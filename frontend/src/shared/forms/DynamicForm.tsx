@@ -8,7 +8,6 @@ import { NumberInput } from './inputs/NumberInput'
 import { EmailInput } from './inputs/EmailInput'
 import { TextAreaInput } from './inputs/TextAreaInput'
 import { MoneyInput } from './inputs/MoneyInput'
-import { FormHeader } from './FormHeader'
 
 type DynamicFormProps = {
   schema: FormSchema
@@ -19,7 +18,6 @@ type DynamicFormProps = {
   onCancel?: () => void
   submitLabel?: string
   cancelLabel?: string
-  headerTitle?: string
 }
 
 export function DynamicForm({
@@ -31,9 +29,8 @@ export function DynamicForm({
   onCancel,
   submitLabel = 'Save',
   cancelLabel = 'Cancel',
-  headerTitle,
 }: DynamicFormProps) {
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isExpanded] = useState(true)
 
   function handleFieldChange(name: string, value: any) {
     onChange({
@@ -156,21 +153,7 @@ export function DynamicForm({
   }
 
   return (
-    <div
-      className={
-        isExpanded
-          ? 'rounded-lg border border-gray-200 overflow-hidden bg-white'
-          : ''
-      }
-    >
-      {headerTitle && (
-        <FormHeader
-          title={headerTitle}
-          isExpanded={isExpanded}
-          onToggle={() => setIsExpanded((prev) => !prev)}
-        />
-      )}
-
+    <div className="rounded-lg border border-gray-200 overflow-hidden bg-white">
       {isExpanded && (
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">

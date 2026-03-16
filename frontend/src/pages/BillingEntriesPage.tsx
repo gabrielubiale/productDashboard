@@ -25,7 +25,6 @@ export function BillingEntriesPage() {
       />
 
       <BillingEntriesForm
-        headerTitle="Pesquisa de lançamentos por contribuinte"
         onSubmitEntry={async (values) => {
           // TODO: integrate with billing entries API or store
           console.log('Billing entry submitted', values)
