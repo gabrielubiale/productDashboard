@@ -13,7 +13,7 @@ const CATEGORY_OPTIONS = [
 ]
 
 const inputClass =
-  'w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed'
+  'w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed'
 
 type ProductFormFieldsProps = {
   defaultValues?: Partial<Pick<NewProduct, 'name' | 'category' | 'price' | 'status'>>
@@ -56,11 +56,11 @@ export function ProductFormFields({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {showTitle && (
-        <h6 className="text-lg font-semibold text-white mb-4">{title}</h6>
+        <h6 className="text-lg font-semibold text-gray-900 mb-4">{title}</h6>
       )}
 
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-1">Nome</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
         <input
           name="name"
           type="text"
@@ -72,10 +72,10 @@ export function ProductFormFields({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-1">Categoria</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
         <select name="category" defaultValue={defaultCategory} required disabled={isLoading} className={inputClass}>
           {CATEGORY_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value} className="bg-gray-800">
+            <option key={opt.value} value={opt.value} className="bg-white">
               {opt.label}
             </option>
           ))}
@@ -83,7 +83,7 @@ export function ProductFormFields({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-1">Preço</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Preço</label>
         <input
           name="price"
           type="number"
@@ -97,10 +97,10 @@ export function ProductFormFields({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-1">Status</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
         <select name="status" defaultValue={defaultStatus} required disabled={isLoading} className={inputClass}>
           {STATUS_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value} className="bg-gray-800">
+            <option key={option.value} value={option.value} className="bg-white">
               {option.label}
             </option>
           ))}
@@ -112,7 +112,7 @@ export function ProductFormFields({
           type="button"
           onClick={onCancel}
           disabled={isLoading}
-          className="border border-gray-700 text-gray-300 px-4 py-2 rounded-lg hover:border-gray-600 hover:bg-gray-800/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:border-gray-400 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Cancelar
         </button>

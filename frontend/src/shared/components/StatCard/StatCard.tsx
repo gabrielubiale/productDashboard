@@ -22,11 +22,11 @@ export function StatCard({
   return (
     <div
       className={`
-        group relative overflow-hidden rounded-2xl border
-        bg-linear-to-br from-gray-900/90 to-gray-800/90
-        p-6 shadow-lg backdrop-blur-sm
+        group relative overflow-hidden rounded-2xl border border-gray-200
+        bg-white
+        p-6 shadow-sm
         transition-all duration-300 ease-out
-        hover:scale-[1.02] hover:border-opacity-60 hover:shadow-2xl
+        hover:scale-[1.01] hover:shadow-md
         ${borderColor}
       `}
     >
@@ -35,7 +35,7 @@ export function StatCard({
       />
       <div className="relative z-10">
         <div className="mb-3 flex items-center justify-between gap-3">
-          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
             {title}
           </p>
           <div
@@ -49,7 +49,7 @@ export function StatCard({
             <Icon size={18} weight="fill" className={`${iconColor} transition-transform group-hover:scale-110`} />
           </div>
         </div>
-        <h4 className="font-bold text-white transition-colors group-hover:text-gray-100 text-2xl">
+        <h4 className="font-bold text-gray-900 transition-colors group-hover:text-gray-900 text-2xl">
           {value}
         </h4>
       </div>

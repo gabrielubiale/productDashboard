@@ -46,14 +46,14 @@ export function ProductsListPage() {
           <button
             type="button"
             onClick={() => setCreateModalOpen(true)}
-            className="bg-linear-to-r from-blue-600 to-blue-700 text-white shadow-lg px-4 py-2 rounded-lg transition-all hover:from-blue-700 hover:to-blue-800 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Novo produto
           </button>
         }
       />
 
-      <div className="rounded-xl border border-gray-800 bg-gray-900/50 p-4 backdrop-blur-sm">
+      <div className="rounded-xl border border-gray-200 bg-white p-4">
         <ProductsFilters isLoading={isLoading} />
       </div>
 
@@ -73,7 +73,7 @@ export function ProductsListPage() {
       )}
 
       {!isLoading && !error && products.length > 0 && (
-        <div className="rounded-2xl border border-gray-800 bg-gray-900/30 p-6 backdrop-blur-sm">
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <ProductsTable
             products={products}
             onEdit={(p) => setEditProductId(p.id)}

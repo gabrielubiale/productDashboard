@@ -60,10 +60,10 @@ export function ProductsFilters({ isLoading }: ProductsFiltersProps) {
     }
   }
 
-  const inputClass = 'w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed min-h-[50px]'
-  const labelClass = 'block text-sm font-medium text-gray-400 mb-1'
+  const inputClass = 'w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed min-h-[50px]'
+  const labelClass = 'block text-sm font-medium text-gray-700 mb-1'
   const fieldClass = 'flex flex-1 flex-col min-w-0'
-  const btnClass = 'flex items-center justify-center gap-2 border border-gray-700 text-gray-300 hover:border-gray-600 hover:bg-gray-800 px-4 py-2 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-[50px]'
+  const btnClass = 'flex items-center justify-center gap-2 border border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-100 px-4 py-2 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-[50px]'
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 sm:items-end">
@@ -89,7 +89,7 @@ export function ProductsFilters({ isLoading }: ProductsFiltersProps) {
           className={inputClass}
         >
           {STATUS_OPTIONS.map((option) => (
-            <option key={option.value || 'all'} value={option.value} className="bg-gray-800">
+            <option key={option.value || 'all'} value={option.value} className="bg-white">
               {option.label}
             </option>
           ))}

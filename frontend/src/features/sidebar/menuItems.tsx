@@ -8,6 +8,7 @@ import {
   CurrencyDollar,
   ChartBarHorizontal,
   TrendUp,
+  CurrencyCircleDollar,
 } from 'phosphor-react'
 import type { MenuItem } from './types'
 
@@ -64,6 +65,18 @@ export const menuItems: MenuItem[] = [
         label: 'Vendas por categoria',
         anchor: '#chart-sales-by-category',
         icon: <ChartPie size={ICON_SIZE_SUBITEM} />,
+      },
+    ],
+  },
+  {
+    label: 'Cobrança',
+    path: '/cobranca/lancamentos',
+    icon: <CurrencyCircleDollar size={ICON_SIZE_ITEM} />,
+    subItems: [
+      {
+        label: 'Consulta de lançamentos',
+        anchor: '#',
+        icon: <CurrencyDollar size={ICON_SIZE_SUBITEM} />,
       },
     ],
   },

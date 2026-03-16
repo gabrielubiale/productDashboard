@@ -32,7 +32,7 @@ export function DynamicTable<T>({
 }: DynamicTableProps<T>) {
   if (data.length === 0 && emptyMessage) {
     return (
-      <div className={`overflow-hidden rounded-2xl border border-gray-800 bg-gray-900/50 py-12 text-center text-gray-400 ${className}`}>
+      <div className={`overflow-hidden rounded-2xl border border-gray-200 bg-white py-12 text-center text-gray-500 ${className}`}>
         {emptyMessage}
       </div>
     )
@@ -43,15 +43,15 @@ export function DynamicTable<T>({
   }
 
   return (
-    <div className={`overflow-hidden rounded-2xl border border-gray-800 bg-gray-900/50 shadow-xl backdrop-blur-sm ${className}`}>
+    <div className={`overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm ${className}`}>
       <div className="overflow-x-auto">
         <table className="w-full" style={{ minWidth }}>
           <thead>
-            <tr className="border-b border-gray-800 bg-gray-900/80">
+            <tr className="border-b border-gray-200 bg-gray-50">
               {columns.map((col) => (
                 <th
                   key={col.id}
-                  className={`px-4 py-3 font-semibold text-gray-300 ${alignClass[col.align ?? 'left']}`}
+                  className={`px-4 py-3 font-semibold text-gray-700 ${alignClass[col.align ?? 'left']}`}
                 >
                   {col.header}
                 </th>
@@ -63,9 +63,9 @@ export function DynamicTable<T>({
               <tr
                 key={keyExtractor(item)}
                 className={`
-                  border-b border-gray-800/50 transition-all duration-200
-                  hover:bg-gray-800/30 hover:shadow-[inset_4px_0_0_rgba(59,130,246,0.5)]
-                  ${index % 2 === 0 ? 'bg-gray-900/30' : 'bg-gray-900/50'}
+                  border-b border-gray-100 transition-all duration-200
+                  hover:bg-blue-50 hover:shadow-[inset_4px_0_0_rgba(59,130,246,0.5)]
+                  ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
                   ${rowClassName?.(item, index) ?? ''}
                 `}
               >

@@ -41,13 +41,13 @@ export function ConfirmModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>
-      <p className="text-gray-400 mb-6">{message}</p>
+      <p className="text-gray-600 mb-6">{message}</p>
       <div className="flex justify-end gap-2">
         <button
           type="button"
           onClick={onClose}
           disabled={isLoading}
-          className="border border-gray-700 text-gray-300 px-4 py-2 rounded-lg hover:border-gray-600 hover:bg-gray-800/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:border-gray-400 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {cancelLabel}
         </button>

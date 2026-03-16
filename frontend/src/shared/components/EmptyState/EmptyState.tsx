@@ -7,9 +7,9 @@ type EmptyStateProps = {
 
 export function EmptyState({ title, description, actionLabel, onAction }: EmptyStateProps) {
   return (
-    <div className="py-12 flex justify-center items-center text-center rounded-xl border border-gray-800 bg-gray-900">
+    <div className="py-12 flex justify-center items-center text-center rounded-xl border border-gray-200 bg-white">
       <div className="space-y-3">
-        <h6 className="text-white font-semibold text-lg">
+        <h6 className="text-gray-900 font-semibold text-lg">
           {title}
         </h6>
         {description && (

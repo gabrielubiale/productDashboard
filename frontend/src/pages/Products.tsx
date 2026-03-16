@@ -49,7 +49,7 @@ export function Products() {
           action={
             <a
               href="/products?mode=form"
-              className="bg-linear-to-r from-blue-600 to-blue-700 text-white shadow-lg px-4 py-2 rounded-lg transition-all hover:from-blue-700 hover:to-blue-800 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Novo produto
             </a>
@@ -58,7 +58,7 @@ export function Products() {
       )}
 
       {isFormMode ? (
-        <div className="rounded-2xl border border-gray-800 bg-gray-900/50 p-6 backdrop-blur-sm shadow-xl">
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <ProductForm />
         </div>
       ) : (
@@ -81,7 +81,7 @@ export function Products() {
           {!isLoading && !error && products.length > 0 && (
             <>
               <StatsCardsProductsDashboard />
-              <hr className="my-8 border-gray-800" />
+              <hr className="my-8 border-gray-200" />
               <ProductsCharts />
             </>
           )}

@@ -9,7 +9,7 @@ import { LandingPageNavigation } from '../features/landingPage/components/Landin
 
 export function LandingPage() {
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-gray-50 text-gray-900">
       <div className="mx-auto max-w-4xl px-4 py-12 lg:py-16 animate-in fade-in duration-500">
         {/* Título e introdução */}
         <header className="mb-16 text-center">
@@ -26,7 +26,7 @@ export function LandingPage() {
 
         {/* Requisitos atendidos */}
         <section className="my-16">
-          <h2 className="mb-6 flex items-center gap-2 text-xl font-semibold text-white">
+          <h2 className="mb-6 flex items-center gap-2 text-xl font-semibold text-gray-900">
             <CheckCircle size={24} weight="fill" className="text-green-500" />
             Requisitos atendidos
           </h2>
@@ -43,10 +43,10 @@ export function LandingPage() {
             ].map((item) => (
               <li
                 key={item}
-                className="flex items-start gap-3 rounded-lg border border-gray-800 bg-gray-900/30 px-4 py-3"
+                className="flex items-start gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3"
               >
                 <CheckCircle size={20} weight="fill" className="mt-0.5 shrink-0 text-green-500" />
-                <span className="text-gray-300">{item}</span>
+                <span className="text-gray-700">{item}</span>
               </li>
             ))}
           </ul>
@@ -54,7 +54,7 @@ export function LandingPage() {
 
         {/* Decisões técnicas */}
         <section className="mb-16">
-          <h2 className="mb-6 flex items-center gap-2 text-xl font-semibold text-white">
+          <h2 className="mb-6 flex items-center gap-2 text-xl font-semibold text-gray-900">
             <PuzzlePiece size={24} className="text-blue-400" />
             Decisões técnicas
           </h2>
@@ -83,10 +83,10 @@ export function LandingPage() {
             ].map((item) => (
               <div
                 key={item.title}
-                className="rounded-xl border border-gray-800 bg-gray-900/50 p-4 backdrop-blur-sm"
+                className="rounded-xl border border-gray-200 bg-white p-4"
               >
-                <h3 className="mb-1 font-medium text-white">{item.title}</h3>
-                <p className="text-sm text-gray-400">{item.desc}</p>
+                <h3 className="mb-1 font-medium text-gray-900">{item.title}</h3>
+                <p className="text-sm text-gray-600">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -94,7 +94,7 @@ export function LandingPage() {
 
         {/* Diferenciais */}
         <section className="mb-16">
-          <h2 className="mb-6 flex items-center gap-2 text-xl font-semibold text-white">
+          <h2 className="mb-6 flex items-center gap-2 text-xl font-semibold text-gray-900">
             <Rocket size={24} className="text-amber-400" />
             Diferenciais e proatividade
           </h2>
@@ -106,9 +106,9 @@ export function LandingPage() {
               'Componentes reutilizáveis: DynamicTable, ConfirmModal, ProductFormFields.',
               'Cards de estatísticas: total de produtos, disponíveis, vendas e faturamento.',
             ].map((item) => (
-              <li key={item} className="flex gap-3 rounded-lg border border-gray-800 bg-gray-900/30 px-4 py-3">
+              <li key={item} className="flex gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3">
                 <ChartBar size={20} className="mt-0.5 shrink-0 text-purple-400" />
-                <span className="text-gray-300">{item}</span>
+                <span className="text-gray-700">{item}</span>
               </li>
             ))}
           </ul>
@@ -116,13 +116,13 @@ export function LandingPage() {
 
         {/* Como executar */}
         <section className="mb-16">
-          <h2 className="mb-6 flex items-center gap-2 text-xl font-semibold text-white">
+          <h2 className="mb-6 flex items-center gap-2 text-xl font-semibold text-gray-900">
             <Database size={24} className="text-cyan-400" />
             Como executar
           </h2>
-          <div className="rounded-xl border border-gray-800 bg-gray-900/50 p-6 font-mono text-sm">
-            <p className="mb-2 text-gray-400">Na raiz do projeto:</p>
-            <pre className="text-gray-300">
+          <div className="rounded-xl border border-gray-200 bg-white p-6 font-mono text-sm">
+            <p className="mb-2 text-gray-600">Na raiz do projeto:</p>
+            <pre className="text-gray-800">
               {`npm install
 npm run dev`}
             </pre>

@@ -37,19 +37,19 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       aria-labelledby="modal-title"
     >
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden
       />
-      <div className="relative w-full max-w-md rounded-xl border border-gray-800 bg-gray-900 shadow-xl">
-        <div className="flex items-center justify-between border-b border-gray-800 px-6 py-4">
-          <h2 id="modal-title" className="text-lg font-semibold text-white">
+      <div className="relative w-full max-w-md rounded-xl border border-gray-200 bg-white shadow-lg">
+        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+          <h2 id="modal-title" className="text-lg font-semibold text-gray-900">
             {title}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-800 hover:text-white"
+            className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
             aria-label="Fechar"
           >
             <X size={20} weight="bold" />

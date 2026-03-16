@@ -12,7 +12,7 @@ export function ChartContainer({ id, title, description, children, className = '
   return (
     <div
       id={id}
-      className={`flex h-full flex-col overflow-hidden rounded-2xl border border-gray-800 bg-linear-to-br from-gray-900/90 to-gray-800/90 shadow-xl backdrop-blur-sm transition-all duration-300 hover:border-gray-700 hover:shadow-2xl ${className}`}
+      className={`flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md ${className}`}
     >
       <ChartContainerHeader title={title} description={description} />
       {children}
