@@ -56,6 +56,14 @@ function mapRemoteToBillingEntry(remote: RemoteBillingEntry): BillingEntry {
   }
 }
 
+// Detalhe do lançamento: por enquanto, usamos o mesmo shape básico do RemoteBillingEntry
+// e adicionamos campos específicos da rota de detalhe.
+export type RemoteBillingEntryDetail = RemoteBillingEntry & {
+  historico?: string
+}
+
+export type BillingEntryDetail = RemoteBillingEntryDetail
+
 export const billingEntriesService = {
   async fetchBillingEntries(page: number): Promise<BillingEntry[]> {
     const params = new URLSearchParams({
@@ -70,6 +78,18 @@ export const billingEntriesService = {
     )
 
     return data.map(mapRemoteToBillingEntry)
+  },
+
+  async fetchBillingEntryDetail(lancamentoId: string): Promise<BillingEntryDetail> {
+    const params = new URLSearchParams({
+      lancamentoId,
+    })
+
+    const detail = await tributosHttpClient.get<RemoteBillingEntryDetail>(
+      `/lancamentos/detalhe?${params.toString()}`,
+    )
+
+    return detail
   },
 }
 

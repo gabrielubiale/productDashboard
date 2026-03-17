@@ -6,9 +6,10 @@ type ModalProps = {
   onClose: () => void
   title: string
   children: React.ReactNode
+  contentClassName?: string
 }
 
-export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, contentClassName }: ModalProps) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -41,7 +42,11 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         onClick={onClose}
         aria-hidden
       />
-      <div className="relative flex w-full max-w-[800px] max-h-[600px] flex-col rounded-xl bg-white shadow-lg">
+      <div
+        className={`relative flex w-full max-w-[800px] max-h-[600px] flex-col rounded-xl bg-white shadow-lg ${
+          contentClassName ?? ''
+        }`}
+      >
         <header className="shrink-0 bg-linear-to-b from-blue-100 to-blue-50 px-6 py-4 flex items-center justify-between rounded-t-xl">
           <h6 id="modal-title" className="font-semibold text-black text-lg mb-0.5">
             {title}

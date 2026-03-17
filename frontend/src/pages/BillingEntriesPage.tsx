@@ -3,7 +3,7 @@ import { PageTitle } from '../shared/components/PageTitle/PageTitle'
 import { DynamicTable } from '../shared/components/DynamicTable/DynamicTable'
 import { BillingEntriesForm } from '../features/BillingEntries/BillingEntriesForm'
 import { billingEntriesService } from '../services/billingEntriesService'
-import type { BillingEntry } from '../services/billingEntriesService'
+import type { BillingEntry, BillingEntryDetail } from '../services/billingEntriesService'
 import { CurrencyDollar, Eye } from 'phosphor-react'
 import { Modal } from '../shared/components/Modal/Modal'
 import { BillingEntryDetails } from '../features/BillingEntries/components/BillingEntryDetails'
@@ -15,6 +15,9 @@ export function BillingEntriesPage() {
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [selectedEntry, setSelectedEntry] = useState<BillingEntry | null>(null)
+  const [selectedEntryDetail, setSelectedEntryDetail] = useState<BillingEntryDetail | null>(null)
+  const [isDetailLoading, setIsDetailLoading] = useState(false)
+  const [detailError, setDetailError] = useState<string | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -62,6 +65,23 @@ export function BillingEntriesPage() {
       console.error(err)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  async function handleOpenDetails(entry: BillingEntry) {
+    setSelectedEntry(entry)
+    setSelectedEntryDetail(null)
+    setDetailError(null)
+
+    try {
+      setIsDetailLoading(true)
+      const detail = await billingEntriesService.fetchBillingEntryDetail(entry.lancamentoId)
+      setSelectedEntryDetail(detail)
+    } catch (err) {
+      console.error(err)
+      setDetailError('Não foi possível carregar os detalhes do lançamento. Tente novamente.')
+    } finally {
+      setIsDetailLoading(false)
     }
   }
 
@@ -115,7 +135,9 @@ export function BillingEntriesPage() {
       render: (item: BillingEntry) => (
         <button
           type="button"
-          onClick={() => setSelectedEntry(item)}
+          onClick={() => {
+            void handleOpenDetails(item)
+          }}
           className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:border-blue-300 transition-colors cursor-pointer"
           title="Ver detalhes do lançamento"
         >
@@ -172,11 +194,21 @@ export function BillingEntriesPage() {
 
       <Modal
         isOpen={selectedEntry !== null}
-        onClose={() => setSelectedEntry(null)}
+        contentClassName="w-[1000px] min-h-[800px] max-h-[800px]"
+        onClose={() => {
+          setSelectedEntry(null)
+          setSelectedEntryDetail(null)
+          setDetailError(null)
+        }}
         title="Detalhes do lançamento"
       >
         {selectedEntry && (
-          <BillingEntryDetails entry={selectedEntry} />
+          <BillingEntryDetails
+            entry={selectedEntry}
+            detail={selectedEntryDetail}
+            isLoading={isDetailLoading}
+            error={detailError}
+          />
         )}
       </Modal>
     </div>
