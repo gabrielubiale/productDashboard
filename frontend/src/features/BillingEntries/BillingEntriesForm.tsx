@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { FunnelSimple, MagnifyingGlass } from 'phosphor-react'
 import { FiltersSidebar } from '../../shared/components/FiltersSidebar/FiltersSidebar'
 import { BillingEntriesAdvancedFilters } from './components/BillingEntriesAdvancedFilters'
+import AsyncContributorSelect from './components/AsyncContributorSelect'
+import type { RemoteContributor } from '../../services/contributorsService'
 
 type BillingEntriesFormProps = {
   initialValues?: Record<string, any>
@@ -13,8 +15,9 @@ export function BillingEntriesForm({ initialValues, onSubmitEntry }: BillingEntr
   const [isExpanded] = useState(true)
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
-  const [formValues, setFormValues] = useState<Record<string, any>>({
+  const [formValues, setFormValues] = useState<Record<string, any> & { contributor?: RemoteContributor | null }>({
     cpfCnpj: initialValues?.cpfCnpj ?? '',
+    contributor: initialValues?.contributor ?? null,
     registroNumero: initialValues?.registroNumero ?? null,
     taxCreditType: initialValues?.taxCreditType ?? 'all',
     launchStatus: initialValues?.launchStatus ?? 'all',
@@ -48,6 +51,7 @@ export function BillingEntriesForm({ initialValues, onSubmitEntry }: BillingEntr
   function handleReset() {
     setFormValues({
       cpfCnpj: '',
+      contributor: null,
       registroNumero: null,
       taxCreditType: 'all',
       launchStatus: 'all',
@@ -68,18 +72,19 @@ export function BillingEntriesForm({ initialValues, onSubmitEntry }: BillingEntr
     'flex items-center justify-center gap-2 border border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-100 px-4 py-2 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-[50px]'
 
   return (
-    <div className="rounded-lg border border-gray-200 overflow-hidden bg-white">
+    <div className="rounded-lg border border-gray-200 bg-white">
       {isExpanded && (
         <form onSubmit={handleSubmit}>
           <div className="p-4">
             <div className="flex flex-col sm:flex-row gap-4 sm:items-end">
               <div className={fieldClass}>
-                <label className={labelClass}>CPF/CNPJ</label>
-                <input
-                  type="text"
-                  value={formValues.cpfCnpj}
-                  onChange={(e) => handleChange('cpfCnpj', e.target.value)}
-                  className={inputClass}
+                <AsyncContributorSelect
+                  value={formValues.contributor ?? null}
+                  onChange={(contributor) => {
+                    handleChange('contributor', contributor)
+                    handleChange('cpfCnpj', contributor?.documentoRFB ?? '')
+                  }}
+                  label="CPF/CNPJ"
                   placeholder="CPF/CNPJ do contribuinte"
                 />
               </div>
