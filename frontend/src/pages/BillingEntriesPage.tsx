@@ -3,7 +3,11 @@ import { PageTitle } from '../shared/components/PageTitle/PageTitle'
 import { DynamicTable } from '../shared/components/DynamicTable/DynamicTable'
 import { BillingEntriesForm } from '../features/BillingEntries/BillingEntriesForm'
 import { billingEntriesService } from '../services/billingEntriesService'
-import type { BillingEntry, BillingEntryDetail } from '../services/billingEntriesService'
+import type {
+  BillingEntry,
+  BillingEntryDetail,
+  BillingEntryEvent,
+} from '../services/billingEntriesService'
 import { CurrencyDollar, Eye } from 'phosphor-react'
 import { Modal } from '../shared/components/Modal/Modal'
 import { BillingEntryDetails } from '../features/BillingEntries/components/BillingEntryDetails'
@@ -16,6 +20,7 @@ export function BillingEntriesPage() {
   const [hasMore, setHasMore] = useState(true)
   const [selectedEntry, setSelectedEntry] = useState<BillingEntry | null>(null)
   const [selectedEntryDetail, setSelectedEntryDetail] = useState<BillingEntryDetail | null>(null)
+  const [selectedEntryEvents, setSelectedEntryEvents] = useState<BillingEntryEvent[]>([])
   const [isDetailLoading, setIsDetailLoading] = useState(false)
   const [detailError, setDetailError] = useState<string | null>(null)
 
@@ -71,12 +76,22 @@ export function BillingEntriesPage() {
   async function handleOpenDetails(entry: BillingEntry) {
     setSelectedEntry(entry)
     setSelectedEntryDetail(null)
+    setSelectedEntryEvents([])
     setDetailError(null)
 
     try {
       setIsDetailLoading(true)
-      const detail = await billingEntriesService.fetchBillingEntryDetail(entry.lancamentoId)
+      const [detail, events] = await Promise.all([
+        billingEntriesService.fetchBillingEntryDetail(entry.lancamentoId),
+        billingEntriesService.fetchBillingEntryEvents({
+          origemId: entry.lancamentoId,
+          numeroOrigem: entry.numeroLancamento,
+          tipoOrigem: 1,
+        }),
+      ])
+
       setSelectedEntryDetail(detail)
+      setSelectedEntryEvents(events)
     } catch (err) {
       console.error(err)
       setDetailError('Não foi possível carregar os detalhes do lançamento. Tente novamente.')
@@ -194,10 +209,11 @@ export function BillingEntriesPage() {
 
       <Modal
         isOpen={selectedEntry !== null}
-        contentClassName="w-[1000px] min-h-[800px] max-h-[800px]"
+        contentClassName="w-[1000px] max-w-[1000px] min-h-[800px] max-h-[800px]"
         onClose={() => {
           setSelectedEntry(null)
           setSelectedEntryDetail(null)
+          setSelectedEntryEvents([])
           setDetailError(null)
         }}
         title="Detalhes do lançamento"
@@ -206,6 +222,7 @@ export function BillingEntriesPage() {
           <BillingEntryDetails
             entry={selectedEntry}
             detail={selectedEntryDetail}
+            events={selectedEntryEvents}
             isLoading={isDetailLoading}
             error={detailError}
           />

@@ -8,7 +8,7 @@ export type Column<T> = {
 type DynamicTableProps<T> = {
   data: T[]
   columns: Column<T>[]
-  keyExtractor: (item: T) => string
+  keyExtractor: (item: T, index: number) => string
   emptyMessage?: string
   minWidth?: string
   className?: string
@@ -61,7 +61,7 @@ export function DynamicTable<T>({
           <tbody>
             {data.map((item, index) => (
               <tr
-                key={keyExtractor(item)}
+                key={keyExtractor(item, index)}
                 className={`
                   border-b border-gray-100 transition-all duration-200
                   hover:bg-blue-50 hover:shadow-[inset_4px_0_0_rgba(59,130,246,0.5)]

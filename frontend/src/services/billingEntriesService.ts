@@ -64,6 +64,13 @@ export type RemoteBillingEntryDetail = RemoteBillingEntry & {
 
 export type BillingEntryDetail = RemoteBillingEntryDetail
 
+export type BillingEntryEvent = {
+  data: string
+  tipoEvento: string
+  descricaoEvento: string
+  usuario: string
+}
+
 export const billingEntriesService = {
   async fetchBillingEntries(page: number): Promise<BillingEntry[]> {
     const params = new URLSearchParams({
@@ -90,6 +97,24 @@ export const billingEntriesService = {
     )
 
     return detail
+  },
+
+  async fetchBillingEntryEvents(input: {
+    origemId: string
+    numeroOrigem: number
+    tipoOrigem: number
+  }): Promise<BillingEntryEvent[]> {
+    const params = new URLSearchParams({
+      origemId: input.origemId,
+      numeroOrigem: String(input.numeroOrigem),
+      tipoOrigem: String(input.tipoOrigem),
+    })
+
+    const events = await tributosHttpClient.get<BillingEntryEvent[]>(
+      `/eventos/listarEventos?${params.toString()}`,
+    )
+
+    return events
   },
 }
 

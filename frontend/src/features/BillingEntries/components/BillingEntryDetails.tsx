@@ -1,11 +1,18 @@
 import { CaretDown, CaretUp } from 'phosphor-react'
 import { useState } from 'react'
-import type { BillingEntry, BillingEntryDetail } from '../../../services/billingEntriesService'
+import type {
+  BillingEntry,
+  BillingEntryDetail,
+  BillingEntryEvent,
+} from '../../../services/billingEntriesService'
+import { DynamicTable } from '../../../shared/components/DynamicTable/DynamicTable'
 import { formatDocument } from '../../../shared/utils/formatDocument'
+import { formatDateTime } from '../../../shared/utils/formatDateTime'
 
 type BillingEntryDetailsProps = {
   entry: BillingEntry
   detail?: BillingEntryDetail | null
+  events?: BillingEntryEvent[]
   isLoading?: boolean
   error?: string | null
 }
@@ -18,7 +25,13 @@ type SectionId =
   | 'divida'
   | 'identificacaoCredito'
 
-export function BillingEntryDetails({ entry, detail, isLoading, error }: BillingEntryDetailsProps) {
+export function BillingEntryDetails({
+  entry,
+  detail,
+  events = [],
+  isLoading,
+  error,
+}: BillingEntryDetailsProps) {
   const [openSections, setOpenSections] = useState<Record<SectionId, boolean>>({
     identificacao: true,
     contribuinte: true,
@@ -71,6 +84,53 @@ export function BillingEntryDetails({ entry, detail, isLoading, error }: Billing
   }
 
   const historicoParsed = parseHistorico((detail as BillingEntryDetail | undefined)?.historico ?? (effective as any).historico)
+
+  function renderDescricaoEventoWithHighlight(descricao: string) {
+    if (!descricao) return null
+
+    const match = descricao.match(/\$([\d.,]+)/)
+    if (!match) {
+      return descricao.split('\n').map((line, index) => (
+        <span key={index} className="block">
+          {line}
+        </span>
+      ))
+    }
+
+    const rawAmount = match[1]
+    const amountNumber = Number(
+      rawAmount.replace(/\./g, '').replace(',', '.'),
+    )
+
+    const formattedAmount =
+      Number.isFinite(amountNumber)
+        ? amountNumber.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+          })
+        : rawAmount
+
+    const before = descricao.slice(0, match.index)
+    const after = descricao.slice((match.index ?? 0) + match[0].length)
+
+    return (
+      <>
+        {before && (
+          <span className="block whitespace-pre-line">
+            {before}
+          </span>
+        )}
+        <span className="block text-green-700 font-semibold">
+          {formattedAmount}
+        </span>
+        {after && (
+          <span className="block whitespace-pre-line">
+            {after}
+          </span>
+        )}
+      </>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-3 text-sm text-gray-700">
@@ -318,35 +378,38 @@ export function BillingEntryDetails({ entry, detail, isLoading, error }: Billing
         </button>
         {openSections.identificacaoCredito && (
           <div className="border-t border-gray-200 px-3 py-3">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1 md:col-span-2">
-                <span className="text-sm text-gray-500">Descrição crédito</span>
-                <span className="font-semibold text-gray-900 text-base">
-                  {effective.identificacaoCreditoDescricao}
-                </span>
-              </div>
-
-              <div className="flex flex-col gap-1 md:col-span-2">
-                <span className="text-sm text-gray-500">Descrição resumida</span>
-                <span className="font-semibold text-gray-900 text-base">
-                  {effective.identificacaoCreditoDescricaoResumida}
-                </span>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <span className="text-sm text-gray-500">Identificação</span>
-                <span className="font-semibold text-gray-900 text-base">
-                  {effective.identificacaoDescricao}
-                </span>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <span className="text-sm text-gray-500">Valor identificação</span>
-                <span className="font-semibold text-gray-900 text-base">
-                  {effective.identificacaoValor}
-                </span>
-              </div>
-            </div>
+            <DynamicTable<BillingEntryEvent>
+              data={events}
+              keyExtractor={(_item: BillingEntryEvent, index: number) => String(index)}
+              minWidth="600px"
+              emptyMessage="Nenhum evento encontrado para este lançamento."
+              columns={[
+                {
+                  id: 'data',
+                  header: 'Data e hora',
+                  render: (item) => formatDateTime(item.data),
+                },
+                {
+                  id: 'tipoEvento',
+                  header: 'Tipo do evento',
+                  render: (item) => item.tipoEvento,
+                },
+                {
+                  id: 'descricaoEvento',
+                  header: 'Descrição',
+                  render: (item) => (
+                    <div className="text-sm text-gray-700">
+                      {renderDescricaoEventoWithHighlight(item.descricaoEvento)}
+                    </div>
+                  ),
+                },
+                {
+                  id: 'usuario',
+                  header: 'Usuário',
+                  render: (item) => item.usuario,
+                },
+              ]}
+            />
           </div>
         )}
       </section>

@@ -32,7 +32,7 @@ export function Modal({ isOpen, onClose, title, children, contentClassName }: Mo
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center"
       role="dialog"
       aria-modal
       aria-labelledby="modal-title"
@@ -43,8 +43,8 @@ export function Modal({ isOpen, onClose, title, children, contentClassName }: Mo
         aria-hidden
       />
       <div
-        className={`relative flex w-full max-w-[800px] max-h-[600px] flex-col rounded-xl bg-white shadow-lg ${
-          contentClassName ?? ''
+        className={`relative flex flex-col rounded-xl bg-white shadow-lg ${
+          contentClassName ?? 'w-full max-w-[800px] max-h-[600px]'
         }`}
       >
         <header className="shrink-0 bg-linear-to-b from-blue-100 to-blue-50 px-6 py-4 flex items-center justify-between rounded-t-xl">
