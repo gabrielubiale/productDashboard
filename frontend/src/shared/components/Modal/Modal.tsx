@@ -41,21 +41,21 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         onClick={onClose}
         aria-hidden
       />
-      <div className="relative w-full max-w-md rounded-xl border border-gray-200 bg-white shadow-lg">
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-          <h2 id="modal-title" className="text-lg font-semibold text-gray-900">
+      <div className="relative flex w-full max-w-[800px] max-h-[600px] flex-col rounded-xl bg-white shadow-lg">
+        <header className="shrink-0 bg-linear-to-b from-blue-100 to-blue-50 px-6 py-4 flex items-center justify-between rounded-t-xl">
+          <h6 id="modal-title" className="font-semibold text-black text-lg mb-0.5">
             {title}
-          </h2>
+          </h6>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-lg p-1.5 transition-colors hover:bg-blue-500/40 text-gray-600  hover:text-gray-800 cursor-pointer"
             aria-label="Fechar"
           >
             <X size={20} weight="bold" />
           </button>
-        </div>
-        <div className="px-6 py-4">{children}</div>
+        </header>
+        <div className="flex-1 px-6 py-4 overflow-y-auto">{children}</div>
       </div>
     </div>
   )

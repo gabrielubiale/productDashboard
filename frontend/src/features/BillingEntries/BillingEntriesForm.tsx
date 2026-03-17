@@ -132,6 +132,7 @@ export function BillingEntriesForm({ initialValues, onSubmitEntry }: BillingEntr
         isOpen={isFiltersOpen}
         onClose={() => setIsFiltersOpen(false)}
         title="Filtros avançados"
+        size="md"
       >
         <BillingEntriesAdvancedFilters
           values={formValues}
@@ -142,7 +143,7 @@ export function BillingEntriesForm({ initialValues, onSubmitEntry }: BillingEntr
           <button
             type="button"
             onClick={handleReset}
-            className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-colors text-sm"
+            className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-colors text-sm cursor-pointer"
           >
             Limpar filtros
           </button>
@@ -152,7 +153,7 @@ export function BillingEntriesForm({ initialValues, onSubmitEntry }: BillingEntr
               void handleSubmit()
               setIsFiltersOpen(false)
             }}
-            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors text-sm"
+            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors text-sm cursor-pointer"
           >
             Aplicar filtros
           </button>

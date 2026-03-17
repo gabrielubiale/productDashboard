@@ -24,7 +24,7 @@ export function FiltersSidebar({
     }
   }
 
-  const panelWidthClass = size === 'sm' ? 'max-w-sm' : 'max-w-md'
+  const panelWidthClass = size === 'sm' ? 'max-w-sm' : 'max-w-[600px]'
 
   return (
     <div
@@ -32,18 +32,24 @@ export function FiltersSidebar({
       onClick={handleOverlayClick}
     >
       <aside
-        className={`flex h-full w-full ${panelWidthClass} flex-col bg-white shadow-2xl border-l border-gray-200 rounded-l-2xl mt-3 mb-3 overflow-hidden`}
+        className={`flex w-full ${panelWidthClass} flex-col max-h-screen bg-white shadow-2xl border-l border-gray-200 rounded-l-2xl overflow-hidden`}
       >
-        <header className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-          <h2 className="text-sm font-semibold text-gray-900">
-            {title}
-          </h2>
+        <header className="shrink-0 border-b border-gray-200 bg-gray-50 px-6 py-4 flex items-center justify-between">
+          <div>
+            <h6 className="font-semibold text-gray-900 text-lg mb-1">
+              {title}
+            </h6>
+            <p className="text-gray-600 text-sm">
+              Ajuste os filtros avançados do lançamento.
+            </p>
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="px-2 py-1 text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+            className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 cursor-pointer"
+            aria-label="Fechar filtros"
           >
-            <X size={24} weight="bold" />
+            <X size={20} weight="bold" />
           </button>
         </header>
 

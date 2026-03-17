@@ -17,29 +17,42 @@ export type RemoteBillingEntry = {
   situacaoLancamento: number
   situacaoLancamentoDescricao: string
   situacaoLancamentoVirtualDescricao: string
+  valorJuros: number
+  valorJurosRecebido: number
+  valorJurosTotal: number
+  valorMulta: number
+  valorMultaRecebida: number
+  valorMultaTotal: number
+  valorCorrecaoMonetaria: number
+  valorCorrecaoMonetariaRecebida: number
+  valorCorrecaoMonetariaTotal: number
+  tipoLiquidacao: number
+  tipoLiquidacaoDescricao: string
+  vencido: boolean
+  parcelado: boolean
+  lancamentoEmParcelas: boolean
+  dividaAtiva: boolean
+  dividaAtivaComCDA: boolean
+  dividaAtivaId: string
+  numeroDAT: number
+  numeroCDA: number
+  numeroParcelamento: number
+  identificacaoCreditoDescricao: string
+  identificacaoCreditoDescricaoResumida: string
+  identificacaoDescricao: string
+  identificacaoValor: string
+  exercicio: number
+  podeInscreverDAT: boolean
 }
 
-export type BillingEntry = {
+export type BillingEntry = RemoteBillingEntry & {
   id: string
-  numeroLancamento: number
-  contribuinte: string
-  documento: string
-  tipoCredito: string
-  situacao: string
-  dataVencimento: string
-  valorTotal: number
 }
 
 function mapRemoteToBillingEntry(remote: RemoteBillingEntry): BillingEntry {
   return {
+    ...remote,
     id: remote.lancamentoId,
-    numeroLancamento: remote.numeroLancamento,
-    contribuinte: remote.nome,
-    documento: remote.documentoRFB,
-    tipoCredito: remote.tipoCreditoDescricaoResumida || remote.tipoCreditoDescricao,
-    situacao: remote.situacaoLancamentoVirtualDescricao || remote.situacaoLancamentoDescricao,
-    dataVencimento: remote.dataVencimento,
-    valorTotal: remote.valorTotal,
   }
 }
 

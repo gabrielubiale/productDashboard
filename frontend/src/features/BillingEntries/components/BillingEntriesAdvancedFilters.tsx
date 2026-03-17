@@ -11,12 +11,12 @@ export function BillingEntriesAdvancedFilters({
   onChange,
 }: BillingEntriesAdvancedFiltersProps) {
   return (
-    <div className="space-y-4">
-      <div className="space-y-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-3">
+    <div className="flex flex-col gap-2 space-y-4">
+      <div className="space-y-2 flex flex-col rounded-2xl px-3 py-3 border border-gray-200 bg-gray-50">
         <span className="text-[11px] font-semibold tracking-wide text-gray-500 uppercase">
           Situações
         </span>
-        <div className="mt-2 space-y-3">
+        <div className="mt-3 space-y-3 flex flex-col gap-2">
           <SelectInput
             name="onlyActiveDebt"
             label="Apenas em dívida ativa?"
@@ -55,11 +55,11 @@ export function BillingEntriesAdvancedFilters({
         </div>
       </div>
 
-      <div className="space-y-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-3">
+      <div className="space-y-2 flex flex-col rounded-2xl px-3 py-3 border border-gray-200 bg-gray-50">
         <span className="text-[11px] font-semibold tracking-wide text-gray-500 uppercase">
           Tipo de crédito e situação
         </span>
-        <div className="mt-2 space-y-3">
+        <div className="mt-3 space-y-3 flex flex-col gap-2">
           <SelectInput
             name="taxCreditType"
             label="Tipo de crédito tributário"
@@ -94,11 +94,11 @@ export function BillingEntriesAdvancedFilters({
         </div>
       </div>
 
-      <div className="space-y-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-3">
+      <div className="space-y-2 flex flex-col rounded-2xl px-3 py-3 border border-gray-200 bg-gray-50">
         <span className="text-[11px] font-semibold tracking-wide text-gray-500 uppercase">
           Data de vencimento
         </span>
-        <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
           <DateInput
             name="dueDateStart"
             label="Data inicial"
@@ -114,11 +114,11 @@ export function BillingEntriesAdvancedFilters({
         </div>
       </div>
 
-      <div className="space-y-2 rounded-2xl border border-gray-200 bg-gray-50 px-3 py-3 mb-1">
+      <div className="space-y-2 flex flex-col rounded-2xl px-3 py-3 border border-gray-200 bg-gray-50">
         <span className="text-[11px] font-semibold tracking-wide text-gray-500 uppercase">
           Data de liquidação
         </span>
-        <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
           <DateInput
             name="settlementDateStart"
             label="Data inicial"

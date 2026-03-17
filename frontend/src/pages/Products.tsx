@@ -9,6 +9,7 @@ import { Loader } from '../shared/components/Loader/Loader'
 import { ErrorMessage } from '../shared/components/ErrorMessage/ErrorMessage'
 import { EmptyState } from '../shared/components/EmptyState/EmptyState'
 import { PageTitle } from '../shared/components/PageTitle/PageTitle'
+import { SquaresFour } from 'phosphor-react'
 
 export function Products() {
   const [searchParams] = useSearchParams()
@@ -45,6 +46,7 @@ export function Products() {
       {!isFormMode && (
         <PageTitle
           title="Dashboard"
+          icon={<SquaresFour size={24} weight="bold" />}
           description="Visão estratégica de produtos e vendas."
           action={
             <a

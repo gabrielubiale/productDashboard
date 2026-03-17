@@ -4,6 +4,9 @@ import { DynamicTable } from '../shared/components/DynamicTable/DynamicTable'
 import { BillingEntriesForm } from '../features/BillingEntries/BillingEntriesForm'
 import { billingEntriesService } from '../services/billingEntriesService'
 import type { BillingEntry } from '../services/billingEntriesService'
+import { CurrencyDollar, Eye } from 'phosphor-react'
+import { Modal } from '../shared/components/Modal/Modal'
+import { BillingEntryDetails } from '../features/BillingEntries/components/BillingEntryDetails'
 
 export function BillingEntriesPage() {
   const [data, setData] = useState<BillingEntry[]>([])
@@ -11,6 +14,7 @@ export function BillingEntriesPage() {
   const [error, setError] = useState<string | null>(null)
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
+  const [selectedEntry, setSelectedEntry] = useState<BillingEntry | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -70,22 +74,24 @@ export function BillingEntriesPage() {
     {
       id: 'contribuinte',
       header: 'Contribuinte',
-      render: (item: BillingEntry) => item.contribuinte,
+      render: (item: BillingEntry) => item.nome,
     },
     {
       id: 'documento',
       header: 'CPF/CNPJ',
-      render: (item: BillingEntry) => item.documento,
+      render: (item: BillingEntry) => item.documentoRFB,
     },
     {
       id: 'tipoCredito',
       header: 'Crédito',
-      render: (item: BillingEntry) => item.tipoCredito,
+      render: (item: BillingEntry) =>
+        item.tipoCreditoDescricaoResumida || item.tipoCreditoDescricao,
     },
     {
       id: 'situacao',
       header: 'Situação',
-      render: (item: BillingEntry) => item.situacao,
+      render: (item: BillingEntry) =>
+        item.situacaoLancamentoVirtualDescricao || item.situacaoLancamentoDescricao,
     },
     {
       id: 'dataVencimento',
@@ -102,12 +108,28 @@ export function BillingEntriesPage() {
           currency: 'BRL',
         }),
     },
+    {
+      id: 'actions',
+      header: 'Ver mais',
+      align: 'center' as const,
+      render: (item: BillingEntry) => (
+        <button
+          type="button"
+          onClick={() => setSelectedEntry(item)}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:border-blue-300 transition-colors cursor-pointer"
+          title="Ver detalhes do lançamento"
+        >
+          <Eye size={16} weight="bold" />
+        </button>
+      ),
+    },
   ]
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <PageTitle
         title="Consulta de lançamentos"
+        icon={<CurrencyDollar size={24} weight="bold" />}
         description="Tela de consulta de lançamentos financeiros/tributários."
       />
 
@@ -147,6 +169,16 @@ export function BillingEntriesPage() {
           </button>
         </div>
       )}
+
+      <Modal
+        isOpen={selectedEntry !== null}
+        onClose={() => setSelectedEntry(null)}
+        title="Detalhes do lançamento"
+      >
+        {selectedEntry && (
+          <BillingEntryDetails entry={selectedEntry} />
+        )}
+      </Modal>
     </div>
   )
 }
