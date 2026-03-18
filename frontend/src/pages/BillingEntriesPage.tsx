@@ -12,6 +12,7 @@ import type {
 import { CurrencyDollar, Eye } from 'phosphor-react'
 import { Modal } from '../shared/components/Modal/Modal'
 import { BillingEntryDetails } from '../features/BillingEntries/components/BillingEntryDetails'
+import { BillingEntryDetailsCompact } from '../features/BillingEntries/components/BillingEntryDetailsCompact'
 import { formatDocument } from '../shared/utils/formatDocument'
 
 function BillingEntriesAccordionTable({
@@ -92,7 +93,7 @@ function BillingEntriesAccordionTable({
                   {isExpanded && (
                     <tr className="bg-white">
                       <td colSpan={columns.length} className="px-4 py-4 border-b border-gray-100">
-                        <BillingEntryDetails
+                        <BillingEntryDetailsCompact
                           entry={item}
                           detail={detail}
                           events={events}
