@@ -66,7 +66,6 @@ export function BillingEntriesForm({ initialValues, onSubmitEntry }: BillingEntr
 
   const inputClass =
     'w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed min-h-[50px]'
-  const labelClass = 'block text-xs font-medium text-gray-600 mb-1'
   const fieldClass = 'flex flex-1 flex-col min-w-0'
   const btnSecondaryClass =
     'flex items-center justify-center gap-2 border border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-100 px-4 py-2 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-[50px]'

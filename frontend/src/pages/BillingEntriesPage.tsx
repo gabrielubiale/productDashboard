@@ -11,6 +11,7 @@ import type {
 import { CurrencyDollar, Eye } from 'phosphor-react'
 import { Modal } from '../shared/components/Modal/Modal'
 import { BillingEntryDetails } from '../features/BillingEntries/components/BillingEntryDetails'
+import { formatDocument } from '../shared/utils/formatDocument'
 
 export function BillingEntriesPage() {
   const [data, setData] = useState<BillingEntry[]>([])
@@ -114,7 +115,7 @@ export function BillingEntriesPage() {
     {
       id: 'documento',
       header: 'CPF/CNPJ',
-      render: (item: BillingEntry) => item.documentoRFB,
+      render: (item: BillingEntry) => formatDocument(item.documentoRFB),
     },
     {
       id: 'tipoCredito',
@@ -201,8 +202,28 @@ export function BillingEntriesPage() {
 
       <BillingEntriesForm
         onSubmitEntry={async (values) => {
-          // Futuro: usar values para montar filtros da API real
-          console.log('Billing entries filters submitted', values)
+          try {
+            setIsLoading(true)
+            setError(null)
+
+            const contribuinteId = values.contributor?.id
+            const numeroLancamento = values.registroNumero ?? null
+
+            const entries = await billingEntriesService.fetchBillingEntriesWithFilters({
+              page: 1,
+              contribuinteId,
+              numeroLancamento,
+            })
+
+            setData(entries)
+            setPage(1)
+            setHasMore(entries.length === 10)
+          } catch (err) {
+            console.error(err)
+            setError('Não foi possível carregar os lançamentos com os filtros informados. Tente novamente.')
+          } finally {
+            setIsLoading(false)
+          }
         }}
       />
 

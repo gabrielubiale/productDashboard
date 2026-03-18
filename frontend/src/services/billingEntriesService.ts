@@ -73,12 +73,32 @@ export type BillingEntryEvent = {
 
 export const billingEntriesService = {
   async fetchBillingEntries(page: number): Promise<BillingEntry[]> {
+    const data = await billingEntriesService.fetchBillingEntriesWithFilters({
+      page,
+    })
+
+    return data
+  },
+
+  async fetchBillingEntriesWithFilters(input: {
+    page: number
+    contribuinteId?: string
+    numeroLancamento?: string | number | null
+  }): Promise<BillingEntry[]> {
     const params = new URLSearchParams({
       tipoCredito: '1',
       dataVencimentoInicial: '2021-03-15',
-      pagina: String(page),
+      pagina: String(input.page),
       itens: '10',
     })
+
+    if (input.contribuinteId) {
+      params.set('contribuinteId', input.contribuinteId)
+    }
+
+    if (input.numeroLancamento) {
+      params.set('numeroLancamento', String(input.numeroLancamento))
+    }
 
     const data = await tributosHttpClient.get<RemoteBillingEntry[]>(
       `/lancamentos/listar?${params.toString()}`,
