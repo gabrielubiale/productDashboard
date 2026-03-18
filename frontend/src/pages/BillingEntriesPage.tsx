@@ -429,6 +429,18 @@ export function BillingEntriesPage() {
         minWidth="600px"
       />
 
+      {hasMore && !isLoading && (
+        <div className="flex justify-center mt-2">
+          <button
+            type="button"
+            onClick={handleLoadMore}
+            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors text-sm font-medium cursor-pointer"
+          >
+            Carregar mais
+          </button>
+        </div>
+      )}
+
       {/* v2 - tabela com accordion inline (sem modal) */}
       {data.length > 0 && (
         <div className="space-y-3">
@@ -450,18 +462,6 @@ export function BillingEntriesPage() {
             loadingById={loadingById}
             errorById={errorById}
           />
-        </div>
-      )}
-
-      {hasMore && !isLoading && (
-        <div className="flex justify-center mt-2">
-          <button
-            type="button"
-            onClick={handleLoadMore}
-            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors text-sm font-medium cursor-pointer"
-          >
-            Carregar mais
-          </button>
         </div>
       )}
 
