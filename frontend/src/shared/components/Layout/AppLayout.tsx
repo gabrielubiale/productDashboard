@@ -38,7 +38,7 @@ export function AppLayout() {
       >
         {/* Conteúdo Scrollável */}
         <div className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-[1920px] p-4 lg:p-6">
+          <div className="max-w-[1920px] p-4 lg:p-6 m-4 bg-white rounded-2xl shadow-sm">
             <Outlet />
           </div>
         </div>

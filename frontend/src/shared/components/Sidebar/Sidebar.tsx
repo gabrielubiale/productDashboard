@@ -80,7 +80,7 @@ export function Sidebar({ isOpen = true, onClose, collapsed = false, onToggleCol
 
   return (
     <div
-      className={`fixed left-0 top-3 bottom-3 z-40 ${sidebarWidthClass} transform border border-gray-200 bg-slate-50 shadow-lg rounded-tr-2xl rounded-br-2xl transition-all ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
+      className={`fixed left-0 top-3 bottom-3 z-40 ${sidebarWidthClass} transform bg-white rounded-2xl rounded-l-none shadow-sm transition-all ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
     >
       {/* título */}
       <div className="flex h-14 w-full items-center justify-between border-b border-gray-200 px-3">
