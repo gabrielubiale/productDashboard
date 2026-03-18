@@ -7,6 +7,7 @@ import type {
 } from '../../../services/billingEntriesService'
 import { DynamicTable } from '../../../shared/components/DynamicTable/DynamicTable'
 import { formatDocument } from '../../../shared/utils/formatDocument'
+import { SectionHeader } from '../../../shared/components/SectionHeader.tsx'
 import { formatDateTime } from '../../../shared/utils/formatDateTime'
 
 type BillingEntryDetailsProps = {
@@ -132,6 +133,21 @@ export function BillingEntryDetails({
     )
   }
 
+  function formatCurrency(value: number): string {
+    const safe = Number.isFinite(value) ? value : 0
+    return safe.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    })
+  }
+
+  const valorPrincipal = Number.isFinite(effective.valorTotal) ? effective.valorTotal : 0
+  const encargos =
+    (Number.isFinite(effective.valorJurosTotal) ? effective.valorJurosTotal : 0) +
+    (Number.isFinite(effective.valorMultaTotal) ? effective.valorMultaTotal : 0) +
+    (Number.isFinite(effective.valorCorrecaoMonetariaTotal) ? effective.valorCorrecaoMonetariaTotal : 0)
+  const valorGuia = valorPrincipal + encargos
+
   return (
     <div className="flex flex-col gap-3 text-sm text-gray-700">
       {isLoading && (
@@ -204,25 +220,11 @@ export function BillingEntryDetails({
             </div>
           </div>
       </div>
-
-      {/* Bloco 2 - Valores */}
+      {/* valores do lançamentos */}
       <section className="flex flex-col rounded-lg border border-gray-200">
-        <button
-          type="button"
-          onClick={() => toggle('valores')}
-          className="flex w-full items-center justify-between px-3 py-2 text-left cursor-pointer bg-blue-100"
-        >
-          <span className="text-[11px] font-semibold tracking-wide text-gray-700 uppercase">
-            Valores do lançamento
-          </span>
-          {openSections.valores ? (
-            <CaretUp size={16} className="text-gray-500" />
-          ) : (
-            <CaretDown size={16} className="text-gray-500" />
-          )}
-        </button>
+        <SectionHeader title="Valores do lançamento" />
         {openSections.valores && (
-          <div className="flex flex-row gap-4 border-t border-gray-200 px-3 py-3">
+          <div className="flex flex-row gap-4 border-t border-gray-200  px-3 py-3">
             {/* esquerda */}
             <div className='w-full flex flex-col gap-2'>
               <div className='flex flex-row items-center justify-between gap-1'>
@@ -298,86 +300,48 @@ export function BillingEntryDetails({
         )}
       </section>
 
-      {/* Bloco 3 - Histórico de lançamentos */}
+      {/* histórico de lançamentos */}
       <section className="flex flex-col rounded-lg border border-gray-200">
-        <button
-          type="button"
-          onClick={() => toggle('divida')}
-          className="flex w-full items-center justify-between px-3 py-2 text-left cursor-pointer bg-blue-100"
-        >
-          <span className="text-[11px] font-semibold tracking-wide text-gray-700 uppercase">
-            Histórico de lançamentos
-          </span>
-          {openSections.valores ? (
-            <CaretUp size={16} className="text-gray-500" />
-          ) : (
-            <CaretDown size={16} className="text-gray-500" />
-          )}
-        </button>
-        {openSections.divida && (
-          <div className="border-t border-gray-200">
-            {historicoParsed.left.length === 0 && historicoParsed.right.length === 0 ? (
-              <div className="px-3 py-3">
-                <span className="text-sm text-gray-500">
-                  Histórico não disponível para este lançamento.
-                </span>
-              </div>
-            ) : (
-              <div className="flex flex-row gap-4 border-t border-gray-200 px-3 py-3">
-                {/* esquerda */}
-                <div className="w-full flex flex-col gap-2">
-                  {historicoParsed.left.map((item, index) => (
-                    <div key={`hist-left-${index}`} className="flex flex-col gap-0.5">
-                      {item.label && (
-                        <span className="text-sm text-gray-500">
-                          {item.label}
-                        </span>
-                      )}
-                      <span className="text-gray-900 text-base whitespace-pre-line">
-                        {item.value}
-                      </span>
-                    </div>
-                  ))}
+        <SectionHeader title="Histórico de lançamentos" />
+          <div className="flex flex-row gap-4 border-t border-gray-200 px-3 py-3">
+            {/* esquerda */}
+            <div className="w-full flex flex-col gap-2">
+              {historicoParsed.left.map((item, index) => (
+                <div key={`hist-left-${index}`} className="flex flex-col gap-0.5">
+                  {item.label && (
+                    <span className="text-sm text-gray-500">
+                      {item.label}
+                    </span>
+                  )}
+                  <span className="text-gray-900 text-base whitespace-pre-line">
+                    {item.value}
+                  </span>
                 </div>
-                {/* direita */}
-                <div className="w-full flex flex-col gap-2">
-                  {historicoParsed.right.map((item, index) => (
-                    <div key={`hist-right-${index}`} className="flex flex-col gap-0.5">
-                      {item.label && (
-                        <span className="text-sm text-gray-500">
-                          {item.label}
-                        </span>
-                      )}
-                      <span className="text-gray-900 text-base whitespace-pre-line">
-                        {item.value}
-                      </span>
-                    </div>
-                  ))}
+              ))}
+            </div>
+            {/* direita */}
+            <div className="w-full flex flex-col gap-2">
+              {historicoParsed.right.map((item, index) => (
+                <div key={`hist-right-${index}`} className="flex flex-col gap-0.5">
+                  {item.label && (
+                    <span className="text-sm text-gray-500">
+                      {item.label}
+                    </span>
+                  )}
+                  <span className="text-gray-900 text-base whitespace-pre-line">
+                    {item.value}
+                  </span>
                 </div>
-              </div>
-            )}
+              ))}
+            </div>
           </div>
-        )}
+
       </section>
 
-      {/* Bloco 4 - Eventos */}
+      {/* Eventos */}
       <section className="flex flex-col rounded-lg border border-gray-200">
-        <button
-          type="button"
-          onClick={() => toggle('identificacaoCredito')}
-          className="flex w-full items-center justify-between px-3 py-2 text-left cursor-pointer bg-gray-50"
-        >
-          <span className="text-[11px] font-semibold tracking-wide text-gray-700 uppercase">
-            Eventos
-          </span>
-          {openSections.identificacaoCredito ? (
-            <CaretUp size={16} className="text-gray-500" />
-          ) : (
-            <CaretDown size={16} className="text-gray-500" />
-          )}
-        </button>
-        {openSections.identificacaoCredito && (
-          <div className="border-t border-gray-200 px-3 py-3">
+        <SectionHeader title="Eventos" />
+        <div className="border-t border-gray-200 px-3 py-3">
             <DynamicTable<BillingEntryEvent>
               data={events}
               keyExtractor={(_item: BillingEntryEvent, index: number) => String(index)}
@@ -411,7 +375,96 @@ export function BillingEntryDetails({
               ]}
             />
           </div>
-        )}
+      </section>
+
+      {/* guia de recolhimento */}
+      <section className="flex flex-col rounded-lg border border-gray-200">
+        <SectionHeader title="Guia de recolhimento" />
+
+        <div className="flex flex-col md:flex-row gap-6 px-3 py-3">
+          {/* Coluna esquerda - dados do contribuinte e situação */}
+          <div className="w-full md:w-1/2 flex flex-col gap-3">
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-gray-500 uppercase">CPF/CNPJ</span>
+              <span className="font-semibold text-gray-900">
+                {formatDocument(effective.documentoRFB)}
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-gray-500 uppercase">Nome</span>
+              <span className="font-semibold text-gray-900">
+                {effective.nome}
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-gray-500 uppercase">Situação</span>
+              <span className="text-sm text-gray-900">
+                Nova guia de recolhimento
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-gray-500 uppercase">Vencimento</span>
+              <span className="text-sm text-gray-900">
+                {new Date(effective.dataVencimento).toLocaleDateString('pt-BR')}
+              </span>
+            </div>
+          </div>
+
+          {/* Coluna direita - resumo de valores */}
+          <div className="w-full md:w-1/2 flex flex-col gap-3">
+            <div className="flex flex-col gap-3 border rounded-lg px-3 py-3 bg-gray-50">
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm text-gray-600">Valor Principal</span>
+                  <span className="font-semibold text-green-900 text-base">
+                    {formatCurrency(valorPrincipal)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm text-gray-600">Encargos</span>
+                  <span className="font-semibold text-gray-900 text-base">
+                    {formatCurrency(encargos)}
+                  </span>
+                </div>
+
+                <div className="h-px w-full bg-gray-200 my-1" />
+
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-semibold text-gray-700">Valor Guia</span>
+                  <span className="font-bold text-green-900 text-lg">
+                    {formatCurrency(valorGuia)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-gray-500">Valor no vencimento</span>
+                  <span className="font-semibold text-green-900 text-base">
+                    {formatCurrency(valorGuia)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    // Ação fake de emissão da guia
+                    // Futuro: integrar com endpoint real de emissão
+                    // eslint-disable-next-line no-console
+                    console.log('Emitir guia de recolhimento para lançamento', effective.numeroLancamento)
+                  }}
+                  className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 cursor-pointer"
+                >
+                  Emitir
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
     </div>
   )
