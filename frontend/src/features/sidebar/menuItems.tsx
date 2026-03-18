@@ -75,7 +75,7 @@ export const menuItems: MenuItem[] = [
     subItems: [
       {
         label: 'Consulta de lançamentos',
-        anchor: '#',
+        path: '/cobranca/lancamentos',
         icon: <CurrencyDollar size={ICON_SIZE_SUBITEM} />,
       },
     ],

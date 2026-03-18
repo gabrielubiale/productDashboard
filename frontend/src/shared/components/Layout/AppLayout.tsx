@@ -4,12 +4,17 @@ import { Sidebar } from '../Sidebar/Sidebar'
 
 export function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* sidebar Desktop */}
       <div className="hidden lg:block">
-        <Sidebar isOpen={true} />
+        <Sidebar
+          isOpen
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
+        />
       </div>
 
       {/* sidebar para mobile */}
@@ -20,13 +25,17 @@ export function AppLayout() {
             onClick={() => setSidebarOpen(false)}
           />
           <div className="fixed left-0 top-0 z-40 h-screen w-70 lg:hidden">
-            <Sidebar isOpen={true} onClose={() => setSidebarOpen(false)} />
+            <Sidebar isOpen onClose={() => setSidebarOpen(false)} />
           </div>
         </>
       )}
 
       {/* Conteúdo Principal */}
-      <div className="flex flex-1 flex-col lg:ml-70 w-full">
+      <div
+        className={`flex w-full flex-1 flex-col ${
+          sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-70'
+        } transition-[margin] duration-200`}
+      >
         {/* Conteúdo Scrollável */}
         <div className="flex-1 overflow-y-auto">
           <div className="mx-auto max-w-[1920px] p-4 lg:p-6">
