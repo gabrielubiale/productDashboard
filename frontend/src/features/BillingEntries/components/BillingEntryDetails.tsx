@@ -1,5 +1,3 @@
-import { CaretDown, CaretUp } from 'phosphor-react'
-import { useState } from 'react'
 import type {
   BillingEntry,
   BillingEntryDetail,
@@ -7,8 +5,54 @@ import type {
 } from '../../../services/billingEntriesService'
 import { DynamicTable } from '../../../shared/components/DynamicTable/DynamicTable'
 import { formatDocument } from '../../../shared/utils/formatDocument'
-import { SectionHeader } from '../../../shared/components/SectionHeader.tsx'
+import { SectionHeader } from '../../../shared/components/SectionHeader'
 import { formatDateTime } from '../../../shared/utils/formatDateTime'
+
+function n(v: unknown): number {
+  if (typeof v === 'number' && Number.isFinite(v)) return v
+  const x = Number(v)
+  return Number.isFinite(x) ? x : 0
+}
+
+function formatCurrency(value: number): string {
+  const safe = Number.isFinite(value) ? value : 0
+  return safe.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  })
+}
+
+type DetailMoneyRowProps = {
+  label: string
+  amount: number
+  emphasis?: boolean
+  labelBold?: boolean
+}
+
+function DetailMoneyRow({ label, amount, emphasis, labelBold }: DetailMoneyRowProps) {
+  return (
+    <div className="flex flex-row items-center justify-between gap-2 py-0.5">
+      <span
+        className={
+          labelBold
+            ? 'text-sm font-semibold text-gray-600'
+            : 'text-sm text-gray-500'
+        }
+      >
+        {label}
+      </span>
+      <span
+        className={
+          emphasis
+            ? 'text-sm font-semibold text-emerald-700 tabular-nums'
+            : 'text-sm font-medium text-gray-800 tabular-nums'
+        }
+      >
+        {formatCurrency(amount)}
+      </span>
+    </div>
+  )
+}
 
 type BillingEntryDetailsProps = {
   entry: BillingEntry
@@ -18,14 +62,6 @@ type BillingEntryDetailsProps = {
   error?: string | null
 }
 
-type SectionId =
-  | 'identificacao'
-  | 'contribuinte'
-  | 'credito'
-  | 'valores'
-  | 'divida'
-  | 'identificacaoCredito'
-
 export function BillingEntryDetails({
   entry,
   detail,
@@ -33,22 +69,6 @@ export function BillingEntryDetails({
   isLoading,
   error,
 }: BillingEntryDetailsProps) {
-  const [openSections, setOpenSections] = useState<Record<SectionId, boolean>>({
-    identificacao: true,
-    contribuinte: true,
-    credito: true,
-    valores: true,
-    divida: false,
-    identificacaoCredito: false,
-  })
-
-  function toggle(section: SectionId) {
-    setOpenSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }))
-  }
-
   const effective = (detail ?? entry) as BillingEntryDetail | BillingEntry
 
   function parseHistorico(raw?: string | null) {
@@ -84,7 +104,9 @@ export function BillingEntryDetails({
     }
   }
 
-  const historicoParsed = parseHistorico((detail as BillingEntryDetail | undefined)?.historico ?? (effective as any).historico)
+  const historicoParsed = parseHistorico(
+    (detail as BillingEntryDetail | undefined)?.historico ?? (effective as any).historico,
+  )
 
   function renderDescricaoEventoWithHighlight(descricao: string) {
     if (!descricao) return null
@@ -99,365 +121,323 @@ export function BillingEntryDetails({
     }
 
     const rawAmount = match[1]
-    const amountNumber = Number(
-      rawAmount.replace(/\./g, '').replace(',', '.'),
-    )
+    const amountNumber = Number(rawAmount.replace(/\./g, '').replace(',', '.'))
 
-    const formattedAmount =
-      Number.isFinite(amountNumber)
-        ? amountNumber.toLocaleString('pt-BR', {
-            style: 'currency',
-            currency: 'BRL',
-          })
-        : rawAmount
+    const formattedAmount = Number.isFinite(amountNumber)
+      ? amountNumber.toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+        })
+      : rawAmount
 
     const before = descricao.slice(0, match.index)
     const after = descricao.slice((match.index ?? 0) + match[0].length)
 
     return (
       <>
-        {before && (
-          <span className="block whitespace-pre-line">
-            {before}
-          </span>
-        )}
-        <span className="block text-green-700 font-semibold">
-          {formattedAmount}
-        </span>
-        {after && (
-          <span className="block whitespace-pre-line">
-            {after}
-          </span>
-        )}
+        {before && <span className="block whitespace-pre-line">{before}</span>}
+        <span className="block font-semibold text-emerald-700">{formattedAmount}</span>
+        {after && <span className="block whitespace-pre-line">{after}</span>}
       </>
     )
   }
 
-  function formatCurrency(value: number): string {
-    const safe = Number.isFinite(value) ? value : 0
-    return safe.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    })
-  }
-
-  const valorPrincipal = Number.isFinite(effective.valorTotal) ? effective.valorTotal : 0
+  const valorPrincipal = n(effective.valorTotal)
   const encargos =
-    (Number.isFinite(effective.valorJurosTotal) ? effective.valorJurosTotal : 0) +
-    (Number.isFinite(effective.valorMultaTotal) ? effective.valorMultaTotal : 0) +
-    (Number.isFinite(effective.valorCorrecaoMonetariaTotal) ? effective.valorCorrecaoMonetariaTotal : 0)
+    n(effective.valorJurosTotal) +
+    n(effective.valorMultaTotal) +
+    n(effective.valorCorrecaoMonetariaTotal)
   const valorGuia = valorPrincipal + encargos
 
+  const valorLiquidadoTotal =
+    n(effective.valorJurosRecebido) +
+    n(effective.valorMultaRecebida) +
+    n(effective.valorCorrecaoMonetariaRecebida)
+
+  const situacao =
+    ('situacaoLancamentoVirtualDescricao' in effective &&
+      (effective as any).situacaoLancamentoVirtualDescricao) ||
+    (effective as any).situacaoLancamentoDescricao
+  const origem =
+    ('tipoCreditoDescricaoResumida' in effective &&
+      (effective as any).tipoCreditoDescricaoResumida) ||
+    (effective as any).tipoCreditoDescricao
+
+    console.log("effective", effective)
+
+  const contribNome =
+    (effective as any).contribuinte?.pessoa?.nome?.trim() || effective.nome?.trim() || ''
+  const contribDocumento =
+    (effective as any).contribuinte?.pessoa?.documentoRFB || effective.documentoRFB
+
+  const tituloContribuinte = contribNome
+    ? `${contribNome} — ${formatDocument(contribDocumento)}`
+    : formatDocument(contribDocumento)
+
+  const historicoVazio =
+    historicoParsed.left.length === 0 && historicoParsed.right.length === 0
+
   return (
-    <div className="flex flex-col gap-3 text-sm text-gray-700">
+    <div className="flex flex-col gap-5 text-sm text-gray-700 bg-gray-50/40 -mx-2 px-2 py-1 rounded-lg">
       {isLoading && (
-        <p className="text-xs text-blue-600 px-3">
-          Carregando detalhes do lançamento...
-        </p>
+        <p className="text-xs text-blue-600 px-1">Carregando detalhes do lançamento...</p>
       )}
 
-      {error && (
-        <p className="text-xs text-red-600 px-3">
-          {error}
-        </p>
-      )}
-      {/* Bloco 1 - Informações de origem do lançamento */}
-      <div className="px-3 py-3 space-y-4">
-          {/* Linha 1: Nome + CPF/CNPJ centralizados ocupando 100% */}
-          <div className="flex flex-row flex-wrap items-center justify-center text-center gap-2">
-            <span className="font-semibold text-gray-900 text-base">
-              {effective.nome} - {formatDocument(effective.documentoRFB)}
-            </span>
+      {error && <p className="text-xs text-red-600 px-1">{error}</p>}
+
+      {/* Bloco 1 - Hero */}
+      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm space-y-4">
+        {tituloContribuinte && (
+          <div className="text-center">
+            <span className="font-semibold text-gray-900 text-base">{tituloContribuinte}</span>
           </div>
+        )}
 
-          {/* Linha 2: duas metades */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Metade esquerda: situação em destaque + origem */}
-            <div className="flex flex-col gap-3 border rounded justify-center items-center p-3">
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-sm text-gray-500 align-middle">Situação</span>
-                <span className="font-semibold text-gray-900 text-lg">
-                  {('situacaoLancamentoVirtualDescricao' in effective &&
-                    (effective as any).situacaoLancamentoVirtualDescricao) ||
-                    (effective as any).situacaoLancamentoDescricao}
-                </span>
-              </div>
-
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-sm text-gray-500">Origem</span>
-                <span className="font-semibold text-gray-900 text-base">
-                  {('tipoCreditoDescricaoResumida' in effective &&
-                    (effective as any).tipoCreditoDescricaoResumida) ||
-                    (effective as any).tipoCreditoDescricao}
-                </span>
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-3 rounded-lg border border-gray-100 bg-gray-50/80 p-4 justify-center items-center">
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                Situação
+              </span>
+              <span className="font-semibold text-gray-900 text-lg text-center">{situacao}</span>
             </div>
-
-            {/* Metade direita: demais infos chave/valor com space-between */}
-            <div className="flex flex-col justify-around gap-2">
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-sm text-gray-500">Data do fato gerador</span>
-                <span className="font-semibold text-gray-900 text-base">
-                  {effective && (effective as any).dataFatoGerador
-                    ? new Date((effective as any).dataFatoGerador).toLocaleDateString('pt-BR')
-                    : '-'}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-sm text-gray-500">Data de vencimento</span>
-                <span className="font-semibold text-gray-900 text-base">
-                  {new Date(effective.dataVencimento).toLocaleDateString('pt-BR')}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-sm text-gray-500">N° lançamento</span>
-                <span className="font-semibold text-gray-900 text-base">
-                  {effective.numeroLancamento}
-                </span>
-              </div>
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                Origem
+              </span>
+              <span className="font-semibold text-gray-900 text-base text-center">{origem}</span>
             </div>
           </div>
+
+          <div className="flex flex-col justify-center gap-3 rounded-lg border border-gray-100 p-4">
+            <div className="flex items-center justify-between gap-4 border-b border-gray-100 pb-2">
+              <span className="text-sm text-gray-500">Data do fato gerador</span>
+              <span className="font-medium text-gray-900">
+                {(effective as any).dataFatoGerador
+                  ? new Date((effective as any).dataFatoGerador).toLocaleDateString('pt-BR')
+                  : '—'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-4 border-b border-gray-100 pb-2">
+              <span className="text-sm text-gray-500">Data de vencimento</span>
+              <span className="font-medium text-gray-900">
+                {new Date(effective.dataVencimento).toLocaleDateString('pt-BR')}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-sm text-gray-500">N° lançamento</span>
+              <span className="font-medium text-gray-900">{effective.numeroLancamento}</span>
+            </div>
+          </div>
+        </div>
       </div>
-      {/* valores do lançamentos */}
-      <section className="flex flex-col rounded-lg border border-gray-200">
+
+      {/* Valores do lançamento */}
+      <section className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         <SectionHeader title="Valores do lançamento" />
-        {openSections.valores && (
-          <div className="flex flex-row gap-4 border-t border-gray-200  px-3 py-3">
-            {/* esquerda */}
-            <div className='w-full flex flex-col gap-2'>
-              <div className='flex flex-row items-center justify-between gap-1'>
-                <span className="text-sm text-gray-600">Valor original</span>
-                <span className=" text-green-900 text-base">
-                  R$ {effective.valorOriginal}
-                </span>
-              </div>
-              <div className='flex flex-row items-center justify-between gap-1'>
-                <span className="text-[14px] text-gray-600">Juros</span>
-                <span className="text-[14px]">
-                  R$ {effective.valorJurosTotal}
-                </span>
-              </div>
-              <div className='flex flex-row items-center justify-between gap-1'>
-                <span className="text-[14px] text-gray-600">Multa</span>
-                <span className="text-[14px]">
-                  R$ {effective.valorMultaTotal}
-                </span>
-              </div>
-              <div className='flex flex-row items-center justify-between gap-1'>
-                <span className="text-[14px] text-gray-600">Correção monetária</span>
-                <span className="text-[14px]">
-                  R$ {effective.valorCorrecaoMonetariaTotal}
-                </span>
-              </div>
-              <div className='flex flex-row items-center justify-between gap-1'>
-                <span className="text-sm font-bold text-gray-600">Valor Total</span>
-                <span className="font-bold text-green-900 text-base">
-                  R$ {effective.valorTotal}
-                </span>
-              </div>
+        <div className="flex flex-col gap-4 border-t border-gray-200 px-4 py-4 sm:flex-row">
+          <div className="flex w-full flex-col gap-1">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Composição
+            </p>
+            <DetailMoneyRow label="Valor original" amount={n(effective.valorOriginal)} />
+            <DetailMoneyRow label="Juros" amount={n(effective.valorJurosTotal)} />
+            <DetailMoneyRow label="Multa" amount={n(effective.valorMultaTotal)} />
+            <DetailMoneyRow
+              label="Correção monetária"
+              amount={n(effective.valorCorrecaoMonetariaTotal)}
+            />
+            <div className="mt-1 border-t border-gray-100 pt-2">
+              <DetailMoneyRow
+                label="Valor total"
+                amount={n(effective.valorTotal)}
+                emphasis
+                labelBold
+              />
             </div>
-            {/* direita */}
-            <div className='w-full flex flex-col gap-2'>
-              <div className='flex flex-row items-center justify-between gap-1'>
-                <span className="text-sm text-gray-600">Valor Principal Liquidado</span>
-                <span className=" text-green-900 text-base">
-                  R$ {(effective.valorJurosRecebido + effective.valorMultaRecebida + effective.valorCorrecaoMonetariaRecebida).toFixed(2)}
-                </span>
-              </div>
+          </div>
 
-              <div className='flex flex-row items-center justify-between gap-1'>
-                <span className="text-[14px] text-gray-600">Juros</span>
-                <span className="text-[14px]">
-                  R$ {effective.valorJurosRecebido}
-                </span>
-              </div>
+          <div className="hidden sm:block w-px shrink-0 bg-gray-100" aria-hidden />
 
-              <div className='flex flex-row items-center justify-between gap-1'>
-                <span className="text-[14px] text-gray-600">Multa</span>
-                <span className="text-[14px]">
-                  R$ {effective.valorMultaRecebida}
-                </span>
-              </div>
+          <div className="flex w-full flex-col gap-1">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Liquidado
+            </p>
+            <DetailMoneyRow
+              label="Total liquidado (juros+multa+CM)"
+              amount={valorLiquidadoTotal}
+            />
+            <DetailMoneyRow label="Juros recebidos" amount={n(effective.valorJurosRecebido)} />
+            <DetailMoneyRow label="Multa recebida" amount={n(effective.valorMultaRecebida)} />
+            <DetailMoneyRow
+              label="Correção monetária recebida"
+              amount={n(effective.valorCorrecaoMonetariaRecebida)}
+            />
+            <div className="mt-1 border-t border-gray-100 pt-2">
+              <DetailMoneyRow
+                label="Valor liquidado"
+                amount={valorLiquidadoTotal}
+                emphasis
+                labelBold
+              />
+            </div>
+          </div>
+        </div>
+      </section>
 
-              <div className='flex flex-row items-center justify-between gap-1'>
-                <span className="text-[14px] text-gray-600">Correção monetária</span>
-                <span className="text-[14px]">
-                  R$ {effective.valorCorrecaoMonetariaRecebida}
-                </span>
-              </div>
-
-              <div className='flex flex-row items-center justify-between gap-1'>
-                <span className="text-sm font-bold text-gray-600">Valor Liquidado</span>
-                <span className="font-bold text-green-900 text-base">
-                  R$ {(effective.valorJurosRecebido + effective.valorMultaRecebida + effective.valorCorrecaoMonetariaRecebida).toFixed(2)}
-                </span>
-              </div>
-
+      {/* Histórico */}
+      <section className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+        <SectionHeader title="Histórico de lançamentos" />
+        {historicoVazio ? (
+          <div className="border-t border-gray-200 px-4 py-10 text-center">
+            <p className="text-sm text-gray-500">
+              Histórico não disponível para este lançamento.
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-row gap-6 border-t border-gray-200 px-4 py-4">
+            <div className="flex w-full flex-col gap-3">
+              {historicoParsed.left.map((item, index) => (
+                <div key={`hist-left-${index}`} className="flex flex-col gap-0.5">
+                  {item.label && (
+                    <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                      {item.label}
+                    </span>
+                  )}
+                  <span className="whitespace-pre-line text-sm font-medium text-gray-900">
+                    {item.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className="flex w-full flex-col gap-3">
+              {historicoParsed.right.map((item, index) => (
+                <div key={`hist-right-${index}`} className="flex flex-col gap-0.5">
+                  {item.label && (
+                    <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                      {item.label}
+                    </span>
+                  )}
+                  <span className="whitespace-pre-line text-sm font-medium text-gray-900">
+                    {item.value}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         )}
       </section>
 
-      {/* histórico de lançamentos */}
-      <section className="flex flex-col rounded-lg border border-gray-200">
-        <SectionHeader title="Histórico de lançamentos" />
-          <div className="flex flex-row gap-4 border-t border-gray-200 px-3 py-3">
-            {/* esquerda */}
-            <div className="w-full flex flex-col gap-2">
-              {historicoParsed.left.map((item, index) => (
-                <div key={`hist-left-${index}`} className="flex flex-col gap-0.5">
-                  {item.label && (
-                    <span className="text-sm text-gray-500">
-                      {item.label}
-                    </span>
-                  )}
-                  <span className="text-gray-900 text-base whitespace-pre-line">
-                    {item.value}
-                  </span>
-                </div>
-              ))}
-            </div>
-            {/* direita */}
-            <div className="w-full flex flex-col gap-2">
-              {historicoParsed.right.map((item, index) => (
-                <div key={`hist-right-${index}`} className="flex flex-col gap-0.5">
-                  {item.label && (
-                    <span className="text-sm text-gray-500">
-                      {item.label}
-                    </span>
-                  )}
-                  <span className="text-gray-900 text-base whitespace-pre-line">
-                    {item.value}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-      </section>
-
       {/* Eventos */}
-      <section className="flex flex-col rounded-lg border border-gray-200">
+      <section className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         <SectionHeader title="Eventos" />
         <div className="border-t border-gray-200 px-3 py-3">
-            <DynamicTable<BillingEntryEvent>
-              data={events}
-              keyExtractor={(_item: BillingEntryEvent, index: number) => String(index)}
-              minWidth="600px"
-              emptyMessage="Nenhum evento encontrado para este lançamento."
-              columns={[
-                {
-                  id: 'data',
-                  header: 'Data e hora',
-                  render: (item) => formatDateTime(item.data),
-                },
-                {
-                  id: 'tipoEvento',
-                  header: 'Tipo do evento',
-                  render: (item) => item.tipoEvento,
-                },
-                {
-                  id: 'descricaoEvento',
-                  header: 'Descrição',
-                  render: (item) => (
-                    <div className="text-sm text-gray-700">
-                      {renderDescricaoEventoWithHighlight(item.descricaoEvento)}
-                    </div>
-                  ),
-                },
-                {
-                  id: 'usuario',
-                  header: 'Usuário',
-                  render: (item) => item.usuario,
-                },
-              ]}
-            />
-          </div>
+          <DynamicTable<BillingEntryEvent>
+            data={events}
+            keyExtractor={(_item: BillingEntryEvent, index: number) => String(index)}
+            minWidth="600px"
+            emptyMessage="Nenhum evento encontrado para este lançamento."
+            columns={[
+              {
+                id: 'data',
+                header: 'Data e hora',
+                render: (item) => formatDateTime(item.data),
+              },
+              {
+                id: 'tipoEvento',
+                header: 'Tipo do evento',
+                render: (item) => item.tipoEvento,
+              },
+              {
+                id: 'descricaoEvento',
+                header: 'Descrição',
+                render: (item) => (
+                  <div className="text-sm text-gray-700">
+                    {renderDescricaoEventoWithHighlight(item.descricaoEvento)}
+                  </div>
+                ),
+              },
+              {
+                id: 'usuario',
+                header: 'Usuário',
+                render: (item) => item.usuario,
+              },
+            ]}
+          />
+        </div>
       </section>
 
-      {/* guia de recolhimento */}
-      <section className="flex flex-col rounded-lg border border-gray-200">
+      {/* Guia de recolhimento */}
+      <section className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         <SectionHeader title="Guia de recolhimento" />
-
-        <div className="flex flex-col md:flex-row gap-6 px-3 py-3">
-          {/* Coluna esquerda - dados do contribuinte e situação */}
-          <div className="w-full md:w-1/2 flex flex-col gap-3">
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-gray-500 uppercase">CPF/CNPJ</span>
+        <div className="flex flex-col gap-6 border-t border-gray-200 px-4 py-4 md:flex-row">
+          <div className="flex w-full flex-col gap-3 md:w-1/2">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                CPF/CNPJ
+              </span>
               <span className="font-semibold text-gray-900">
                 {formatDocument(effective.documentoRFB)}
               </span>
             </div>
-
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-gray-500 uppercase">Nome</span>
-              <span className="font-semibold text-gray-900">
-                {effective.nome}
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                Nome
               </span>
+              <span className="font-semibold text-gray-900">{effective.nome || '—'}</span>
             </div>
-
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-gray-500 uppercase">Situação</span>
-              <span className="text-sm text-gray-900">
-                Nova guia de recolhimento
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                Situação
               </span>
+              <span className="text-sm text-gray-800">Nova guia de recolhimento</span>
             </div>
-
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-gray-500 uppercase">Vencimento</span>
-              <span className="text-sm text-gray-900">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                Vencimento
+              </span>
+              <span className="text-sm text-gray-800">
                 {new Date(effective.dataVencimento).toLocaleDateString('pt-BR')}
               </span>
             </div>
           </div>
 
-          {/* Coluna direita - resumo de valores */}
-          <div className="w-full md:w-1/2 flex flex-col gap-3">
-            <div className="flex flex-col gap-3 border rounded-lg px-3 py-3 bg-gray-50">
+          <div className="flex w-full flex-col gap-3 md:w-1/2">
+            <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-4">
               <div className="flex flex-col gap-1">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm text-gray-600">Valor Principal</span>
-                  <span className="font-semibold text-green-900 text-base">
+                  <span className="text-sm text-gray-600">Valor principal</span>
+                  <span className="text-sm font-medium tabular-nums text-gray-800">
                     {formatCurrency(valorPrincipal)}
                   </span>
                 </div>
-
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-sm text-gray-600">Encargos</span>
-                  <span className="font-semibold text-gray-900 text-base">
+                  <span className="text-sm font-medium tabular-nums text-gray-800">
                     {formatCurrency(encargos)}
                   </span>
                 </div>
-
-                <div className="h-px w-full bg-gray-200 my-1" />
-
+                <div className="my-2 h-px w-full bg-gray-200" />
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-semibold text-gray-700">Valor Guia</span>
-                  <span className="font-bold text-green-900 text-lg">
+                  <span className="text-sm font-semibold text-gray-800">Valor guia</span>
+                  <span className="text-base font-semibold text-emerald-700 tabular-nums">
                     {formatCurrency(valorGuia)}
                   </span>
                 </div>
-
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs text-gray-500">Valor no vencimento</span>
-                  <span className="font-semibold text-green-900 text-base">
+                  <span className="text-sm font-semibold text-emerald-700 tabular-nums">
                     {formatCurrency(valorGuia)}
                   </span>
                 </div>
               </div>
-
-              <div className="flex justify-end">
+              <div className="flex justify-end pt-1">
                 <button
                   type="button"
                   onClick={() => {
-                    // Ação fake de emissão da guia
-                    // Futuro: integrar com endpoint real de emissão
-                    // eslint-disable-next-line no-console
                     console.log('Emitir guia de recolhimento para lançamento', effective.numeroLancamento)
                   }}
-                  className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 cursor-pointer"
+                  className="inline-flex cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                   Emitir
                 </button>
@@ -469,4 +449,3 @@ export function BillingEntryDetails({
     </div>
   )
 }
-
