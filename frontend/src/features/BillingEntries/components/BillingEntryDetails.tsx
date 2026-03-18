@@ -72,9 +72,9 @@ export function BillingEntryDetails({
   const effective = (detail ?? entry) as BillingEntryDetail | BillingEntry
 
   function parseHistorico(raw?: string | null) {
-    if (!raw) {
-      return { left: [] as { label: string; value: string }[], right: [] as { label: string; value: string }[] }
-    }
+    type ParsedItem = { label: string; value: string }
+
+    if (!raw) return [] as ParsedItem[]
 
     const lines = raw
       .split('\n')
@@ -96,12 +96,7 @@ export function BillingEntryDetails({
       }
     })
 
-    const middle = Math.ceil(items.length / 2)
-
-    return {
-      left: items.slice(0, middle),
-      right: items.slice(middle),
-    }
+    return items
   }
 
   const historicoParsed = parseHistorico(
@@ -149,21 +144,28 @@ export function BillingEntryDetails({
     n(effective.valorCorrecaoMonetariaTotal)
   const valorGuia = valorPrincipal + encargos
 
-  const valorLiquidadoTotal =
-    n(effective.valorJurosRecebido) +
-    n(effective.valorMultaRecebida) +
-    n(effective.valorCorrecaoMonetariaRecebida)
+  const observacaoRaw =
+  (detail as BillingEntryDetail | undefined)?.observacao ??
+  (detail as BillingEntryDetail | undefined)?.observacoes ??
+  (effective as any).observacao ??
+  (effective as any).observacoes
+
+  const observacoesParsed = parseHistorico(observacaoRaw ?? null)
+  const hasObservacoes = observacoesParsed.length > 0
+
+  const valorPrincipalRecebido = n((effective as any).valorPrincipalRecebido)
+  const valorLiquidadoTotal = n((effective as any).valorPago)
 
   const situacao =
     ('situacaoLancamentoVirtualDescricao' in effective &&
       (effective as any).situacaoLancamentoVirtualDescricao) ||
     (effective as any).situacaoLancamentoDescricao
+
+  console.log("situacao", situacao)
   const origem =
     ('tipoCreditoDescricaoResumida' in effective &&
       (effective as any).tipoCreditoDescricaoResumida) ||
     (effective as any).tipoCreditoDescricao
-
-    console.log("effective", effective)
 
   const contribNome =
     (effective as any).contribuinte?.pessoa?.nome?.trim() || effective.nome?.trim() || ''
@@ -174,8 +176,7 @@ export function BillingEntryDetails({
     ? `${contribNome} — ${formatDocument(contribDocumento)}`
     : formatDocument(contribDocumento)
 
-  const historicoVazio =
-    historicoParsed.left.length === 0 && historicoParsed.right.length === 0
+  const historicoVazio = historicoParsed.length === 0
 
   return (
     <div className="flex flex-col gap-5 text-sm text-gray-700 bg-gray-50/40 -mx-2 px-2 py-1 rounded-lg">
@@ -194,18 +195,24 @@ export function BillingEntryDetails({
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-3 rounded-lg border border-gray-100 bg-gray-50/80 p-4 justify-center items-center">
-            <div className="flex flex-col items-center gap-1">
-              <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                Situação
-              </span>
-              <span className="font-semibold text-gray-900 text-lg text-center">{situacao}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1">
-              <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                Origem
-              </span>
-              <span className="font-semibold text-gray-900 text-base text-center">{origem}</span>
+          <div className="flex flex-col gap-4 rounded-lg border border-gray-100 bg-gray-50/80 p-4 justify-center">
+            <div className="flex flex-col items-center justify-center gap-3">
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  Situação
+                </span>
+                <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-100">
+                  {situacao || '—'}
+                </span>
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  Origem
+                </span>
+                <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700 ring-1 ring-inset ring-blue-100">
+                  {origem || '—'}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -264,8 +271,8 @@ export function BillingEntryDetails({
               Liquidado
             </p>
             <DetailMoneyRow
-              label="Total liquidado (juros+multa+CM)"
-              amount={valorLiquidadoTotal}
+              label="Total principal liquidado"
+              amount={valorPrincipalRecebido}
             />
             <DetailMoneyRow label="Juros recebidos" amount={n(effective.valorJurosRecebido)} />
             <DetailMoneyRow label="Multa recebida" amount={n(effective.valorMultaRecebida)} />
@@ -286,33 +293,13 @@ export function BillingEntryDetails({
       </section>
 
       {/* Histórico */}
-      <section className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <SectionHeader title="Histórico de lançamentos" />
-        {historicoVazio ? (
-          <div className="border-t border-gray-200 px-4 py-10 text-center">
-            <p className="text-sm text-gray-500">
-              Histórico não disponível para este lançamento.
-            </p>
-          </div>
-        ) : (
-          <div className="flex flex-row gap-6 border-t border-gray-200 px-4 py-4">
-            <div className="flex w-full flex-col gap-3">
-              {historicoParsed.left.map((item, index) => (
-                <div key={`hist-left-${index}`} className="flex flex-col gap-0.5">
-                  {item.label && (
-                    <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                      {item.label}
-                    </span>
-                  )}
-                  <span className="whitespace-pre-line text-sm font-medium text-gray-900">
-                    {item.value}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <div className="flex w-full flex-col gap-3">
-              {historicoParsed.right.map((item, index) => (
-                <div key={`hist-right-${index}`} className="flex flex-col gap-0.5">
+      {!historicoVazio && (
+        <section className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+          <SectionHeader title="Histórico de lançamentos" />
+          <div className="border-t border-gray-200 px-4 py-4">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+              {historicoParsed.map((item, index) => (
+                <div key={`hist-${index}`} className="flex flex-col gap-0.5">
                   {item.label && (
                     <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
                       {item.label}
@@ -325,8 +312,31 @@ export function BillingEntryDetails({
               ))}
             </div>
           </div>
-        )}
-      </section>
+        </section>
+      )}
+
+      {/* Observações */}
+      {hasObservacoes && (
+        <section className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+          <SectionHeader title="Observações" />
+          <div className="border-t border-gray-200 px-4 py-4">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+              {observacoesParsed.map((item, index) => (
+                <div key={`obs-${index}`} className="flex flex-col gap-0.5">
+                  {item.label && (
+                    <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                      {item.label}
+                    </span>
+                  )}
+                  <span className="whitespace-pre-line text-sm font-medium text-gray-900">
+                    {item.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Eventos */}
       <section className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -368,84 +378,86 @@ export function BillingEntryDetails({
       </section>
 
       {/* Guia de recolhimento */}
-      <section className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <SectionHeader title="Guia de recolhimento" />
-        <div className="flex flex-col gap-6 border-t border-gray-200 px-4 py-4 md:flex-row">
-          <div className="flex w-full flex-col gap-3 md:w-1/2">
-            <div className="flex flex-col gap-0.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                CPF/CNPJ
-              </span>
-              <span className="font-semibold text-gray-900">
-                {formatDocument(effective.documentoRFB)}
-              </span>
+      {situacao !== 'Liquidado' && (
+        <section className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+          <SectionHeader title="Guia de recolhimento" />
+          <div className="flex flex-col gap-6 border-t border-gray-200 px-4 py-4 md:flex-row">
+            <div className="flex w-full flex-col gap-3 md:w-1/2">
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  CPF/CNPJ
+                </span>
+                <span className="font-semibold text-gray-900">
+                  {formatDocument(effective.documentoRFB)}
+                </span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  Nome
+                </span>
+                <span className="font-semibold text-gray-900">{effective.nome || '—'}</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  Situação
+                </span>
+                <span className="text-sm text-gray-800">Nova guia de recolhimento</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                  Vencimento
+                </span>
+                <span className="text-sm text-gray-800">
+                  {new Date(effective.dataVencimento).toLocaleDateString('pt-BR')}
+                </span>
+              </div>
             </div>
-            <div className="flex flex-col gap-0.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                Nome
-              </span>
-              <span className="font-semibold text-gray-900">{effective.nome || '—'}</span>
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                Situação
-              </span>
-              <span className="text-sm text-gray-800">Nova guia de recolhimento</span>
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                Vencimento
-              </span>
-              <span className="text-sm text-gray-800">
-                {new Date(effective.dataVencimento).toLocaleDateString('pt-BR')}
-              </span>
-            </div>
-          </div>
 
-          <div className="flex w-full flex-col gap-3 md:w-1/2">
-            <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-4">
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm text-gray-600">Valor principal</span>
-                  <span className="text-sm font-medium tabular-nums text-gray-800">
-                    {formatCurrency(valorPrincipal)}
-                  </span>
+            <div className="flex w-full flex-col gap-3 md:w-1/2">
+              <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-4">
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm text-gray-600">Valor principal</span>
+                    <span className="text-sm font-medium tabular-nums text-gray-800">
+                      {formatCurrency(valorPrincipal)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm text-gray-600">Encargos</span>
+                    <span className="text-sm font-medium tabular-nums text-gray-800">
+                      {formatCurrency(encargos)}
+                    </span>
+                  </div>
+                  <div className="my-2 h-px w-full bg-gray-200" />
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-semibold text-gray-800">Valor guia</span>
+                    <span className="text-base font-semibold text-emerald-700 tabular-nums">
+                      {formatCurrency(valorGuia)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs text-gray-500">Valor no vencimento</span>
+                    <span className="text-sm font-semibold text-emerald-700 tabular-nums">
+                      {formatCurrency(valorGuia)}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm text-gray-600">Encargos</span>
-                  <span className="text-sm font-medium tabular-nums text-gray-800">
-                    {formatCurrency(encargos)}
-                  </span>
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      console.log('Emitir guia de recolhimento para lançamento', effective.numeroLancamento)
+                    }}
+                    className="inline-flex cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  >
+                    Emitir
+                  </button>
                 </div>
-                <div className="my-2 h-px w-full bg-gray-200" />
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-semibold text-gray-800">Valor guia</span>
-                  <span className="text-base font-semibold text-emerald-700 tabular-nums">
-                    {formatCurrency(valorGuia)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs text-gray-500">Valor no vencimento</span>
-                  <span className="text-sm font-semibold text-emerald-700 tabular-nums">
-                    {formatCurrency(valorGuia)}
-                  </span>
-                </div>
-              </div>
-              <div className="flex justify-end pt-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    console.log('Emitir guia de recolhimento para lançamento', effective.numeroLancamento)
-                  }}
-                  className="inline-flex cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                >
-                  Emitir
-                </button>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   )
 }

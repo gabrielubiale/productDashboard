@@ -43,6 +43,8 @@ export type RemoteBillingEntry = {
   identificacaoValor: string
   exercicio: number
   podeInscreverDAT: boolean
+  valorPrincipalRecebido?: number
+  valorPago?: number
 }
 
 export type BillingEntry = RemoteBillingEntry & {
@@ -58,6 +60,10 @@ function mapRemoteToBillingEntry(remote: RemoteBillingEntry): BillingEntry {
 
 export type RemoteBillingEntryDetail = RemoteBillingEntry & {
   historico?: string
+  // Campos opcionais retornados no detalhe do lançamento.
+  // A API pode retornar tanto `observacao` quanto `observacoes` dependendo do tipo de origem.
+  observacao?: string | null
+  observacoes?: string | null
 }
 
 export type BillingEntryDetail = RemoteBillingEntryDetail
