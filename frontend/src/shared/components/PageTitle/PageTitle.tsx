@@ -2,11 +2,12 @@ type PageTitleProps = {
   title: string
   /** Itens do breadcrumb, por exemplo ['Cobrança', 'Consulta de lançamentos'] */
   breadcrumbItems?: string[]
+  description?: string
   action?: React.ReactNode
   icon?: React.ReactNode
 }
 
-export function PageTitle({ title, breadcrumbItems, action, icon }: PageTitleProps) {
+export function PageTitle({ title, breadcrumbItems, description, action, icon }: PageTitleProps) {
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-stretch">
       {icon && (
@@ -34,6 +35,8 @@ export function PageTitle({ title, breadcrumbItems, action, icon }: PageTitlePro
         <div className="flex flex-row items-center gap-2">
           <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
         </div>
+
+        {description && <p className="text-sm text-gray-600">{description}</p>}
       </div>
 
       {action && <div className="flex items-center gap-3">{action}</div>}

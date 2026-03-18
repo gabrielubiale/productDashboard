@@ -20,7 +20,7 @@ export function Sidebar({ isOpen = true, onClose, collapsed = false, onToggleCol
     return () => window.removeEventListener('hashchange', handleHashChange)
   }, [location])
 
-  const isSubItemActive = (item: MenuItem, subItem: SubMenuItem) => {
+  const isSubItemActive = (_item: MenuItem, subItem: SubMenuItem) => {
     if (subItem.path) {
       return location.pathname === subItem.path
     }

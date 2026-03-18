@@ -56,8 +56,6 @@ function mapRemoteToBillingEntry(remote: RemoteBillingEntry): BillingEntry {
   }
 }
 
-// Detalhe do lançamento: por enquanto, usamos o mesmo shape básico do RemoteBillingEntry
-// e adicionamos campos específicos da rota de detalhe.
 export type RemoteBillingEntryDetail = RemoteBillingEntry & {
   historico?: string
 }

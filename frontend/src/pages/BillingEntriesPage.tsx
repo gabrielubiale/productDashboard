@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { PageTitle } from '../shared/components/PageTitle/PageTitle'
 import { DynamicTable } from '../shared/components/DynamicTable/DynamicTable'
+import type { Column } from '../shared/components/DynamicTable/DynamicTable'
 import { BillingEntriesForm } from '../features/BillingEntries/BillingEntriesForm'
 import { billingEntriesService } from '../services/billingEntriesService'
 import type {
@@ -13,6 +14,104 @@ import { Modal } from '../shared/components/Modal/Modal'
 import { BillingEntryDetails } from '../features/BillingEntries/components/BillingEntryDetails'
 import { formatDocument } from '../shared/utils/formatDocument'
 
+function BillingEntriesAccordionTable({
+  data,
+  columns,
+  expandedId,
+  detailsById,
+  eventsById,
+  loadingById,
+  errorById,
+}: {
+  data: BillingEntry[]
+  columns: Column<BillingEntry>[]
+  expandedId: string | null
+  detailsById: Record<string, BillingEntryDetail | null | undefined>
+  eventsById: Record<string, BillingEntryEvent[] | undefined>
+  loadingById: Record<string, boolean | undefined>
+  errorById: Record<string, string | null | undefined>
+}) {
+  if (data.length === 0) return null
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div className="overflow-x-auto">
+        <table className="w-full" style={{ minWidth: '600px' }}>
+          <thead>
+            <tr className="border-b border-gray-200 bg-gray-50">
+              {columns.map((col) => (
+                <th
+                  key={col.id}
+                  className={`px-4 py-3 font-semibold text-gray-700 ${
+                    col.align === 'right'
+                      ? 'text-right'
+                      : col.align === 'center'
+                        ? 'text-center'
+                        : 'text-left'
+                  }`}
+                >
+                  {col.header}
+                </th>
+              ))}
+            </tr>
+          </thead>
+
+          <tbody>
+            {data.map((item, index) => {
+              const isExpanded = expandedId === item.id
+              const detail = detailsById[item.id]
+              const events = eventsById[item.id] ?? []
+              const isLoading = Boolean(loadingById[item.id])
+              const error = errorById[item.id] ?? null
+
+              return (
+                <Fragment key={item.id}>
+                  <tr
+                    className={`
+                      border-b border-gray-100 transition-all duration-200
+                      hover:bg-blue-50 hover:shadow-[inset_4px_0_0_rgba(59,130,246,0.5)]
+                      ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
+                    `}
+                  >
+                    {columns.map((col) => (
+                      <td
+                        key={col.id}
+                        className={`px-4 py-3 ${
+                          col.align === 'right'
+                            ? 'text-right'
+                            : col.align === 'center'
+                              ? 'text-center'
+                              : 'text-left'
+                        }`}
+                      >
+                        {col.render(item)}
+                      </td>
+                    ))}
+                  </tr>
+
+                  {isExpanded && (
+                    <tr className="bg-white">
+                      <td colSpan={columns.length} className="px-4 py-4 border-b border-gray-100">
+                        <BillingEntryDetails
+                          entry={item}
+                          detail={detail}
+                          events={events}
+                          isLoading={isLoading}
+                          error={error}
+                        />
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
 export function BillingEntriesPage() {
   const [data, setData] = useState<BillingEntry[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -24,6 +123,15 @@ export function BillingEntriesPage() {
   const [selectedEntryEvents, setSelectedEntryEvents] = useState<BillingEntryEvent[]>([])
   const [isDetailLoading, setIsDetailLoading] = useState(false)
   const [detailError, setDetailError] = useState<string | null>(null)
+
+  // v2: accordion inline (sem modal)
+  const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null)
+  const [detailsById, setDetailsById] = useState<Record<string, BillingEntryDetail | null | undefined>>(
+    {},
+  )
+  const [eventsById, setEventsById] = useState<Record<string, BillingEntryEvent[] | undefined>>({})
+  const [loadingById, setLoadingById] = useState<Record<string, boolean | undefined>>({})
+  const [errorById, setErrorById] = useState<Record<string, string | null | undefined>>({})
 
   useEffect(() => {
     let isMounted = true
@@ -98,6 +206,45 @@ export function BillingEntriesPage() {
       setDetailError('Não foi possível carregar os detalhes do lançamento. Tente novamente.')
     } finally {
       setIsDetailLoading(false)
+    }
+  }
+
+  async function handleToggleAccordion(entry: BillingEntry) {
+    const id = entry.id
+
+    if (expandedEntryId === id) {
+      setExpandedEntryId(null)
+      return
+    }
+
+    setExpandedEntryId(id)
+
+    const alreadyFetched = detailsById[id] !== undefined || eventsById[id] !== undefined
+    if (alreadyFetched) return
+
+    setLoadingById((prev) => ({ ...prev, [id]: true }))
+    setErrorById((prev) => ({ ...prev, [id]: null }))
+
+    try {
+      const [detail, events] = await Promise.all([
+        billingEntriesService.fetchBillingEntryDetail(entry.lancamentoId),
+        billingEntriesService.fetchBillingEntryEvents({
+          origemId: entry.lancamentoId,
+          numeroOrigem: entry.numeroLancamento,
+          tipoOrigem: 1,
+        }),
+      ])
+
+      setDetailsById((prev) => ({ ...prev, [id]: detail }))
+      setEventsById((prev) => ({ ...prev, [id]: events }))
+    } catch (err) {
+      console.error(err)
+      setErrorById((prev) => ({
+        ...prev,
+        [id]: 'Não foi possível carregar os detalhes deste lançamento. Tente novamente.',
+      }))
+    } finally {
+      setLoadingById((prev) => ({ ...prev, [id]: false }))
     }
   }
 
@@ -192,6 +339,34 @@ export function BillingEntriesPage() {
     },
   ]
 
+  const accordionColumns: Column<BillingEntry>[] = [
+    ...columns.slice(0, -1),
+    {
+      id: 'expand',
+      header: 'Detalhes',
+      align: 'center',
+      render: (item) => {
+        const isExpanded = expandedEntryId === item.id
+        return (
+          <button
+            type="button"
+            onClick={() => {
+              void handleToggleAccordion(item)
+            }}
+            className={`inline-flex items-center justify-center rounded-lg border px-3 py-1.5 text-sm transition-colors cursor-pointer ${
+              isExpanded
+                ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100'
+                : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+            }`}
+            aria-expanded={isExpanded}
+          >
+            {isExpanded ? 'Recolher' : 'Expandir'}
+          </button>
+        )
+      },
+    },
+  ]
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <PageTitle
@@ -252,6 +427,30 @@ export function BillingEntriesPage() {
         }
         minWidth="600px"
       />
+
+      {/* v2 - tabela com accordion inline (sem modal) */}
+      {data.length > 0 && (
+        <div className="space-y-3">
+          <div className="px-1">
+            <p className="text-sm font-semibold text-gray-900">
+              Versão 2 (detalhes inline, sem modal)
+            </p>
+            <p className="text-xs text-gray-500">
+              Clique em “Expandir” para ver os detalhes do lançamento logo abaixo da linha.
+            </p>
+          </div>
+
+          <BillingEntriesAccordionTable
+            data={data}
+            columns={accordionColumns}
+            expandedId={expandedEntryId}
+            detailsById={detailsById}
+            eventsById={eventsById}
+            loadingById={loadingById}
+            errorById={errorById}
+          />
+        </div>
+      )}
 
       {hasMore && !isLoading && (
         <div className="flex justify-center mt-2">
