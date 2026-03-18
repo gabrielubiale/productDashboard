@@ -36,7 +36,7 @@ export function BillingEntriesPage() {
         if (isMounted) {
           setData(entries)
           setPage(1)
-          setHasMore(entries.length === 10)
+          setHasMore(entries.length === 20)
         }
       } catch (err) {
         if (isMounted) {
@@ -65,7 +65,7 @@ export function BillingEntriesPage() {
       const entries = await billingEntriesService.fetchBillingEntries(nextPage)
       setData((prev) => [...prev, ...entries])
       setPage(nextPage)
-      setHasMore(entries.length === 10)
+      setHasMore(entries.length === 20)
     } catch (err) {
       setError('Não foi possível carregar mais lançamentos. Tente novamente.')
       console.error(err)
@@ -213,11 +213,19 @@ export function BillingEntriesPage() {
               page: 1,
               contribuinteId,
               numeroLancamento,
+              onlyInstallments: values.onlyInstallments,
+              onlyActiveDebt: values.onlyActiveDebt,
+              taxCreditType: values.taxCreditType,
+              launchStatus: values.launchStatus,
+              dueDateStart: values.dueDateStart,
+              dueDateEnd: values.dueDateEnd,
+              settlementDateStart: values.settlementDateStart,
+              settlementDateEnd: values.settlementDateEnd,
             })
 
             setData(entries)
             setPage(1)
-            setHasMore(entries.length === 10)
+            setHasMore(entries.length === 20)
           } catch (err) {
             console.error(err)
             setError('Não foi possível carregar os lançamentos com os filtros informados. Tente novamente.')

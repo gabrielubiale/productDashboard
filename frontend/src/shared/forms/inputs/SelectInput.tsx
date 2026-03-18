@@ -28,15 +28,16 @@ export function SelectInput({
   disabled,
   placeholder,
 }: SelectInputProps) {
-  const baseInputClasses = 'form-input pt-4'
+  const baseInputClasses =
+    'w-full px-3 py-2 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed'
 
   const inputClasses = `${baseInputClasses} ${error ? 'border-red-500' : 'border-gray-300'}`
 
   return (
-    <div className="relative space-y-1">
+    <div className="flex flex-col">
       <label
         htmlFor={name}
-        className="absolute -top-2 left-4 bg-white px-1 text-xs font-medium text-gray-700"
+        className="block text-sm font-medium text-gray-700 mb-1"
       >
         {label}
         {required && <span className="text-red-500 ml-0.5">*</span>}
@@ -49,9 +50,7 @@ export function SelectInput({
         disabled={disabled}
         className={inputClasses}
       >
-        {placeholder && (
-          <option value="">{placeholder}</option>
-        )}
+        {placeholder && <option value="">{placeholder}</option>}
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
@@ -59,9 +58,9 @@ export function SelectInput({
         ))}
       </select>
       {description && !error && (
-        <p className="text-xs text-gray-500">{description}</p>
+        <p className="mt-1 text-xs text-gray-500">{description}</p>
       )}
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   )
 }
