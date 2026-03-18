@@ -66,17 +66,19 @@ export function BillingEntriesForm({ initialValues, onSubmitEntry }: BillingEntr
 
   const inputClass =
     'w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed min-h-[50px]'
-  const labelClass = 'block text-sm font-medium text-gray-700 mb-1'
+  const labelClass = 'block text-xs font-medium text-gray-600 mb-1'
   const fieldClass = 'flex flex-1 flex-col min-w-0'
-  const btnClass =
+  const btnSecondaryClass =
     'flex items-center justify-center gap-2 border border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-100 px-4 py-2 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-[50px]'
+  const btnPrimaryIconClass =
+    'flex items-center justify-center gap-2 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-[50px]'
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white">
+    <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
       {isExpanded && (
         <form onSubmit={handleSubmit}>
-          <div className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4 sm:items-end">
+          <div className="p-4 md:p-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
               <div className={fieldClass}>
                 <AsyncContributorSelect
                   value={formValues.contributor ?? null}
@@ -90,7 +92,7 @@ export function BillingEntriesForm({ initialValues, onSubmitEntry }: BillingEntr
               </div>
 
               <div className={fieldClass}>
-                <label className={labelClass}>N° do registro</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Número do registro</label>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -101,11 +103,11 @@ export function BillingEntriesForm({ initialValues, onSubmitEntry }: BillingEntr
                 />
               </div>
 
-              <div className="shrink-0 flex items-center gap-2">
+              <div className="shrink-0 flex items-center gap-4">
                 <button
                   type="button"
                   onClick={() => handleSubmit()}
-                  className={btnClass}
+                  className={btnPrimaryIconClass}
                   title="Buscar"
                 >
                   <MagnifyingGlass size={20} weight="bold" />
@@ -114,7 +116,7 @@ export function BillingEntriesForm({ initialValues, onSubmitEntry }: BillingEntr
                 <button
                   type="button"
                   onClick={handleReset}
-                  className={btnClass}
+                  className={btnSecondaryClass}
                 >
                   Limpar filtros
                 </button>
@@ -122,7 +124,7 @@ export function BillingEntriesForm({ initialValues, onSubmitEntry }: BillingEntr
                 <button
                   type="button"
                   onClick={() => setIsFiltersOpen(true)}
-                  className={btnClass}
+                  className={btnSecondaryClass}
                 >
                   <FunnelSimple size={18} weight="bold" />
                   <span>Filtros</span>

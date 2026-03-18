@@ -125,8 +125,36 @@ export function BillingEntriesPage() {
     {
       id: 'situacao',
       header: 'Situação',
-      render: (item: BillingEntry) =>
-        item.situacaoLancamentoVirtualDescricao || item.situacaoLancamentoDescricao,
+      render: (item: BillingEntry) => {
+        const raw =
+          item.situacaoLancamentoVirtualDescricao || item.situacaoLancamentoDescricao || ''
+        const value = raw.toLowerCase()
+
+        const baseBadge =
+          'inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium'
+
+        if (value.includes('liquidado')) {
+          return (
+            <span className={`${baseBadge} border-emerald-200 bg-emerald-50 text-emerald-800`}>
+              {raw}
+            </span>
+          )
+        }
+
+        if (value.includes('aberto')) {
+          return (
+            <span className={`${baseBadge} border-amber-200 bg-amber-50 text-amber-800`}>
+              {raw}
+            </span>
+          )
+        }
+
+        return (
+          <span className={`${baseBadge} border-gray-200 bg-gray-50 text-gray-700`}>
+            {raw}
+          </span>
+        )
+      },
     },
     {
       id: 'dataVencimento',
@@ -142,6 +170,7 @@ export function BillingEntriesPage() {
           style: 'currency',
           currency: 'BRL',
         }),
+      align: 'right' as const,
     },
     {
       id: 'actions',
@@ -165,9 +194,9 @@ export function BillingEntriesPage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <PageTitle
+        breadcrumbItems={['Cobrança', 'Consulta de lançamentos']}
         title="Consulta de lançamentos"
         icon={<CurrencyDollar size={24} weight="bold" />}
-        description="Tela de consulta de lançamentos financeiros/tributários."
       />
 
       <BillingEntriesForm
@@ -200,7 +229,7 @@ export function BillingEntriesPage() {
           <button
             type="button"
             onClick={handleLoadMore}
-            className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-colors text-sm cursor-pointer"
+            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors text-sm font-medium cursor-pointer"
           >
             Carregar mais
           </button>
