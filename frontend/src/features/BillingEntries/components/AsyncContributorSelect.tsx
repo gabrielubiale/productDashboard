@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { contributorsService, type RemoteContributor } from '../../../services/contributorsService'
+import { formatDocument } from '../../../shared/utils/formatDocument'
 
 type AsyncContributorSelectProps = {
   value?: RemoteContributor | null
@@ -7,22 +8,6 @@ type AsyncContributorSelectProps = {
   placeholder?: string
   label?: string
   disabled?: boolean
-}
-
-function formatDocumento(documento: string) {
-  const digits = documento.replace(/\D/g, '')
-
-  if (digits.length === 11) {
-    // CPF: 000.000.000-00
-    return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
-  }
-
-  if (digits.length === 14) {
-    // CNPJ: 00.000.000/0000-00
-    return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')
-  }
-
-  return documento
 }
 
 const inputBaseClass =
@@ -33,11 +18,12 @@ const labelBaseClass = 'block text-sm font-medium text-gray-700 mb-1'
 const dropdownBaseClass =
   'absolute mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto z-20'
 
-const optionBaseClass = 'px-3 py-2 text-sm cursor-pointer hover:bg-gray-100'
+// Faz o item do dropdown ocupar 100% da largura para que a linha inteira seja clicável
+const optionBaseClass = 'block w-full px-3 py-2 text-sm cursor-pointer hover:bg-gray-100'
 
 const selectedOptionClass = 'bg-blue-50 text-blue-700'
 
-const stateTextClass = 'px-3 py-2 text-sm text-gray-500 cursor-default'
+const stateTextClass = 'block w-full px-3 py-2 text-sm text-gray-500 cursor-default'
 
 const DEBOUNCE_MS = 300
 
@@ -59,7 +45,7 @@ const AsyncContributorSelect = ({
 
   useEffect(() => {
     if (value) {
-      setInputValue(`${value.nome} - ${formatDocumento(value.documentoRFB)}`)
+      setInputValue(`${value.nome} - ${formatDocument(value.documentoRFB)}`)
       return
     }
 
@@ -118,7 +104,7 @@ const AsyncContributorSelect = ({
 
   function handleSelect(option: RemoteContributor) {
     onChange(option)
-    setInputValue(`${option.nome} - ${formatDocumento(option.documentoRFB)}`)
+    setInputValue(`${option.nome} - ${formatDocument(option.documentoRFB)}`)
     setIsOpen(false)
   }
 
@@ -172,7 +158,7 @@ const AsyncContributorSelect = ({
                   >
                     <div className="font-medium text-gray-900 text-left truncate">{option.nome}</div>
                     <div className="text-xs text-gray-500 text-left">
-                      {formatDocumento(option.documentoRFB)} ({option.documentoRFB})
+                      {formatDocument(option.documentoRFB)} ({option.documentoRFB})
                     </div>
                   </button>
                 )

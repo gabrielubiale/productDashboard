@@ -3,19 +3,10 @@ import type {
   BillingEntryDetail,
   BillingEntryEvent,
 } from '../../../services/billingEntriesService'
-import { formatDocument } from '../../../shared/utils/formatDocument'
 import { formatDateTime } from '../../../shared/utils/formatDateTime'
 
-function n(v: unknown): number {
-  if (typeof v === 'number' && Number.isFinite(v)) return v
-  const x = Number(v)
-  return Number.isFinite(x) ? x : 0
-}
-
-function formatCurrency(value: number): string {
-  const safe = Number.isFinite(value) ? value : 0
-  return safe.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
+import { formatCurrencyBRL } from '../utils/money'
+import { buildBillingEntryDetailsViewModel } from '../viewModels/BillingEntryDetailsViewModel'
 
 type BillingEntryDetailsCompactProps = {
   entry: BillingEntry
@@ -32,60 +23,25 @@ export function BillingEntryDetailsCompact({
   isLoading,
   error,
 }: BillingEntryDetailsCompactProps) {
-  const effective = (detail ?? entry) as BillingEntryDetail | BillingEntry
+  const vm = buildBillingEntryDetailsViewModel(entry, detail)
 
-  const contribNome =
-    (effective as any).contribuinte?.pessoa?.nome?.trim() || (effective as any).nome?.trim() || ''
-  const contribDocumento =
-    (effective as any).contribuinte?.pessoa?.documentoRFB || (effective as any).documentoRFB
-
-  const tituloContribuinte = contribNome
-    ? `${contribNome} — ${formatDocument(contribDocumento)}`
-    : formatDocument(contribDocumento)
-
-  const situacao =
-    ('situacaoLancamentoVirtualDescricao' in effective &&
-      (effective as any).situacaoLancamentoVirtualDescricao) ||
-    (effective as any).situacaoLancamentoDescricao
-
-  const origem =
-    ('tipoCreditoDescricaoResumida' in effective &&
-      (effective as any).tipoCreditoDescricaoResumida) ||
-    (effective as any).tipoCreditoDescricao
-
-  const valorTotal = n((effective as any).valorTotal)
-  const valorOriginal = n((effective as any).valorOriginal)
-  const juros = n((effective as any).valorJurosTotal)
-  const multa = n((effective as any).valorMultaTotal)
-  const correcao = n((effective as any).valorCorrecaoMonetariaTotal)
-
-  const encargos = juros + multa + correcao
-  const valorGuia = valorTotal + encargos
-
-  const valorLiquidado =
-    n((effective as any).valorJurosRecebido) +
-    n((effective as any).valorMultaRecebida) +
-    n((effective as any).valorCorrecaoMonetariaRecebida)
-
-  const dataVencimento = (effective as any).dataVencimento
-    ? new Date((effective as any).dataVencimento).toLocaleDateString('pt-BR')
-    : '—'
-
-  const dataFatoGerador = (effective as any).dataFatoGerador
-    ? new Date((effective as any).dataFatoGerador).toLocaleDateString('pt-BR')
-    : '—'
-
-  const numeroLancamento = (effective as any).numeroLancamento ?? '—'
-
-  const historicoRaw =
-    ((detail as any)?.historico as string | undefined) ??
-    ((effective as any).historico as string | undefined) ??
-    ''
-
-  const historicoLines = historicoRaw
-    .split('\n')
-    .map((l) => l.trim())
-    .filter(Boolean)
+  const {
+    tituloContribuinte,
+    situacao,
+    origem,
+    valorPrincipal,
+    valorOriginal,
+    valorJurosTotal,
+    valorMultaTotal,
+    valorCorrecaoMonetariaTotal,
+    encargos,
+    valorGuia,
+    valorLiquidadoCompact,
+    dataVencimentoLabel,
+    dataFatoGeradorLabel,
+    numeroLancamento,
+    historicoLines,
+  } = vm
 
   const historicoPreview = historicoLines.slice(0, 4)
   const hasMoreHistorico = historicoLines.length > historicoPreview.length
@@ -111,7 +67,7 @@ export function BillingEntryDetailsCompact({
               {situacao}
             </span>
             <span className="text-xs text-gray-500">N° {String(numeroLancamento)}</span>
-            <span className="text-xs text-gray-500">Venc. {dataVencimento}</span>
+            <span className="text-xs text-gray-500">Venc. {dataVencimentoLabel}</span>
           </div>
         </div>
 
@@ -120,7 +76,7 @@ export function BillingEntryDetailsCompact({
             Valor total
           </div>
           <div className="text-sm font-semibold tabular-nums text-emerald-800">
-            {formatCurrency(valorTotal)}
+            {formatCurrencyBRL(valorPrincipal)}
           </div>
         </div>
       </div>
@@ -131,7 +87,7 @@ export function BillingEntryDetailsCompact({
             Original
           </div>
           <div className="text-sm font-medium tabular-nums text-gray-900">
-            {formatCurrency(valorOriginal)}
+            {formatCurrencyBRL(valorOriginal)}
           </div>
         </div>
 
@@ -140,7 +96,7 @@ export function BillingEntryDetailsCompact({
             Encargos
           </div>
           <div className="text-sm font-medium tabular-nums text-gray-900">
-            {formatCurrency(encargos)}
+            {formatCurrencyBRL(encargos)}
           </div>
         </div>
 
@@ -149,7 +105,7 @@ export function BillingEntryDetailsCompact({
             Liquidado
           </div>
           <div className="text-sm font-medium tabular-nums text-gray-900">
-            {formatCurrency(valorLiquidado)}
+            {formatCurrencyBRL(valorLiquidadoCompact)}
           </div>
         </div>
       </div>
@@ -157,18 +113,19 @@ export function BillingEntryDetailsCompact({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
         <div className="rounded-lg border border-gray-100 bg-white px-3 py-2">
           <div className="text-xs text-gray-500">Data do fato gerador</div>
-          <div className="text-sm font-medium text-gray-900">{dataFatoGerador}</div>
+          <div className="text-sm font-medium text-gray-900">{dataFatoGeradorLabel}</div>
         </div>
         <div className="rounded-lg border border-gray-100 bg-white px-3 py-2">
           <div className="text-xs text-gray-500">Juros / Multa / Correção</div>
           <div className="text-sm font-medium tabular-nums text-gray-900">
-            {formatCurrency(juros)} / {formatCurrency(multa)} / {formatCurrency(correcao)}
+            {formatCurrencyBRL(valorJurosTotal)} / {formatCurrencyBRL(valorMultaTotal)} /{' '}
+            {formatCurrencyBRL(valorCorrecaoMonetariaTotal)}
           </div>
         </div>
         <div className="rounded-lg border border-gray-100 bg-white px-3 py-2">
           <div className="text-xs text-gray-500">Valor guia (estimado)</div>
           <div className="text-sm font-semibold tabular-nums text-emerald-700">
-            {formatCurrency(valorGuia)}
+            {formatCurrencyBRL(valorGuia)}
           </div>
         </div>
       </div>
@@ -239,7 +196,7 @@ export function BillingEntryDetailsCompact({
             <div>
               <div className="text-xs text-gray-500">Valor guia</div>
               <div className="text-sm font-semibold tabular-nums text-emerald-700">
-                {formatCurrency(valorGuia)}
+                {formatCurrencyBRL(valorGuia)}
               </div>
             </div>
             <button
